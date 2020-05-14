@@ -1,5 +1,7 @@
 package org.hl7.fhir.saner.parser;
 
+import org.hl7.fhir.saner.model.*;
+
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -11,17 +13,17 @@ import org.json.simple.parser.ParseException;
 
 public class CountryModelParser implements ModelParser {
 
-	private String sourcePath;
-	private ModelParser.FileType fileType;
+	private DataModel.Type type;
+	private String sourcePath = null; 
 
 	/**
 	Constructor
 	@param absolute or relative-path to the source file
-	@param source FileType JSON, CSV or XML.
+	@param data-type JSON, CSV or XML.
 	*/
-	public CountryModelParser(String source, ModelParser.FileType type) {
-		sourcePath = source;
-		fileType = type;
+	public CountryModelParser(String _source, DataModel.Type _type) {
+		sourcePath = _source;
+		type = _type;
 	}
 	
 	/**
@@ -31,7 +33,7 @@ public class CountryModelParser implements ModelParser {
 	public void parseData() {
 		// TODO Auto-generated method stub
 		
-		switch (fileType) {
+		switch (type) {
 	    case JSON: 
 	    	JSONParser();
 	    	break;
