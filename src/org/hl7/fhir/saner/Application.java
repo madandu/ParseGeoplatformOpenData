@@ -1,6 +1,6 @@
 package org.hl7.fhir.saner;
 
-import org.hl7.fhir.saner.decorator.*;
+import org.hl7.fhir.saner.parser.*;
 
 public class Application {
 

@@ -1,4 +1,4 @@
-package org.hl7.fhir.saner.decorator;
+package org.hl7.fhir.saner.parser;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
