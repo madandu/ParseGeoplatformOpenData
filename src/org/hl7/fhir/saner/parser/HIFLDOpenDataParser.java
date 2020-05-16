@@ -1,7 +1,5 @@
 package org.hl7.fhir.saner.parser;
 
-import org.hl7.fhir.saner.data.Context;
-import org.hl7.fhir.saner.data.Context.Type;
 import org.hl7.fhir.saner.data.Model;
 import org.json.JSONArray;
 import org.json.JSONObject;

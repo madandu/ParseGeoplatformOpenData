@@ -2,7 +2,6 @@ package org.hl7.fhir.saner;
 
 import org.hl7.fhir.saner.data.*;
 import org.hl7.fhir.saner.parser.*;
-import org.json.JSONObject;
 
 public class Application {
 
