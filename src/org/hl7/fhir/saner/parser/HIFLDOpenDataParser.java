@@ -1,11 +1,15 @@
 package org.hl7.fhir.saner.parser;
 
+import org.hl7.fhir.saner.data.Context;
+import org.hl7.fhir.saner.data.Context.Type;
+import org.hl7.fhir.saner.data.Model;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.XML;
 
-public class CountyJSONModelParser implements ModelParser {
+public class HIFLDOpenDataParser implements ModelParser {
 
-	private JSONObject data = null;
+	private Model data = null;
 	/**
 	 * Constructor
 	 * 
@@ -14,41 +18,62 @@ public class CountyJSONModelParser implements ModelParser {
 	 * @param data
 	 *            -type JSON, CSV or XML.
 	 */
-	public CountyJSONModelParser(JSONObject  _data) {
+	public HIFLDOpenDataParser(Model  _data) {
 		data  = _data;
 	}
 	
 	/**
-	 * Parses source-file based on its FileType
+	 * Parses source-file based on data-type
 	 * 
 	 * @return prints-out attributes of source-file
 	 */
 	public void parseData() {
-		// TODO Auto-generated method stub
+		
+		switch (data.getContext().Type()) {
+		case JSON:
+			JSONObject jso = data.loadJSON();
+			ParseJSON(jso);
+			break;
+
+		case XML:
+			org.json.XML xmo = data.loadXML();
+			ParseXML(xmo);
+			break;
+
+		default:
+			break;
+		}
+		// Test message;
+	}
+	
+	/**
+	 * Parses JSONObject
+	 * Prints out all hospitals' attributes within JSONObject.
+	 */
+	private void ParseJSON(JSONObject jso) {
+		
 		JSONArray jArr = null;
-		jArr = data.getJSONArray("features");
+		jArr = jso.getJSONArray("features");
 		System.out.println("Begin: listing all hospital]s attributes");
+		
 		for (Object item : jArr) {
 			if (item instanceof JSONObject){
 				JSONObject hospitalAttributes = ((JSONObject)item).getJSONObject("attributes");
 				System.out.println(hospitalAttributes);
 			}
-		}		
-		// Test message;
+		}
+		
 		System.out.println("End.");
 	}
 
 	/**
-	 * Parses JSON source-file
-	 * 
-	 * @return 	-out attributes of JSON source-file
-	 * @throws exception
-	 *             of type java.io.IOException
+	 * Parses XML
+	 * Prints out all hospitals' attributes within XMLObject.
 	 */
-	private void JSONParser(JSONObject jso) {
+	private void ParseXML(XML xmo) {
 		
 		// Parse JSON file
-/*		try (FileReader reader = new FileReader(sourcePath)) {
+/*		try (FileReader reader = new FileReader(so)urcePath)) {
 			JSONParser parser = new JSONParser();
 			JSONObject jso = (JSONObject) parser.parse(reader);
 			JSONArray hospitalsFeatures = ((JSONArray)jso.get("attributes"));

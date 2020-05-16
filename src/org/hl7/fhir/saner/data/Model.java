@@ -20,23 +20,12 @@ public class Model {
 		context = _ctx;
 	}
 
+		
 	public Context getContext() {
 		return context;
 	}
 
-	public Object load() {
-		Object obj = null;
-		switch (this.context.Type()) {
-		case JSON:
-			obj = loadJSON();
-			break;
-		default:
-			break;
-		}
-		return obj;
-	}
-
-	private JSONObject loadJSON() {
+	public JSONObject loadJSON() {
 		JSONObject jso = null;
 
 		try (FileReader reader = new FileReader(context.Source())) {
@@ -56,7 +45,7 @@ public class Model {
 	}
 
 	//TODO: Load xml content.
-	private org.json.XML loadXML() {
+	public org.json.XML loadXML() {
 		org.json.XML xmo = null;
 
 		try (FileReader reader = new FileReader(context.Source())) {

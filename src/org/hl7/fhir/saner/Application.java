@@ -12,12 +12,17 @@ public class Application {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		ProcessHIFLDOpenData();
+	    // Read console output.
+	}
+	
+	private static void ProcessHIFLDOpenData()
+	{
 		// Initial use JSONParser to load HIFLD hospitals' open-data.
 		String source = "./data/hifld/hifld-geoplatform.opendata.arcgis.com.api.json";
-		Model model = new Model(new Context(source, Context.Type.JSON));
-		JSONObject obj = (JSONObject) model.load();
-	    CountyJSONModelParser parser = new CountyJSONModelParser(obj);
+		Context ctx = new Context(source, Context.Type.JSON);
+		Model model = new Model(ctx);
+	    HIFLDOpenDataParser parser = new HIFLDOpenDataParser(model);
 	    parser.parseData();
-	    // Read console output.
 	}
 }
