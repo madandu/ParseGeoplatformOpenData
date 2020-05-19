@@ -18,10 +18,10 @@ public class Application {
 	private static void ProcessHIFLDOpenData()
 	{
 		// Initial use JSONParser to load HIFLD hospitals' open-data.
-		String source = "./data/hifld/hifld-geoplatform.opendata.arcgis.com.api.json";
-		Context ctx = new Context(source, Context.Type.JSON);
-		Model model = new Model(ctx);
-	    HIFLDOpenDataParser parser = new HIFLDOpenDataParser(model);
+		final String source = "./data/hifld/hifld-geoplatform.opendata.arcgis.com.api.json";
+		final Context ctx = new Context(source, Context.Type.JSON);
+		final Model model = new Model(ctx);
+		final HIFLDOpenDataParser parser = new HIFLDOpenDataParser(model);
 	    parser.parseData();
 	}
 }

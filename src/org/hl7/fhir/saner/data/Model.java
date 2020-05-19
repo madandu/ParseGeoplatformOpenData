@@ -17,23 +17,21 @@ public class Model {
 	 *            for source/data.
 	 */
 	public Model(Context _ctx) {
-		context = _ctx;
+		this.context = _ctx;
 	}
 
 		
-	public Context getContext() {
-		return context;
+	public Context Context(){
+		return this.context;
 	}
 
 	public JSONObject loadJSON() {
 		JSONObject jso = null;
 
 		try (FileReader reader = new FileReader(context.Source())) {
-
 			JSONTokener tokener = new JSONTokener(reader);
-			jso = new JSONObject(tokener);
-			
-		} catch (FileNotFoundException e) {
+			jso = new JSONObject(tokener);		
+		} catch (FileNotFoundException e){
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -48,7 +46,7 @@ public class Model {
 	public org.json.XML loadXML() {
 		org.json.XML xmo = null;
 
-		try (FileReader reader = new FileReader(context.Source())) {
+		try (FileReader reader = new FileReader(context.Source())){
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
