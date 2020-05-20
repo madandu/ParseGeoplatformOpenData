@@ -50,8 +50,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 
 		switch (this.model.Context().Type()) {
 		case JSON:
-			QueryAndParseRestJSON();
-			// ParseJSON();
+			ParseJSON();
 			break;
 
 		case XML:
@@ -99,62 +98,68 @@ public class HIFLDOpenDataParser implements ModelParser {
 	}
 
 	/**
-	 * Query opendata-API for USA-hosptials' dataset and parses JSON output.
+	 * Query opendata-API for USA-hosptials' dataset and analyze JSON output.
 	 */
-	private void QueryAndParseRestJSON() {
+	public static void QueryRESTUrlAndAnalyzeData(String sRESTUrl) {
 
-		String sRestURL = "https://opendata.arcgis.com/datasets/6ac5e325468c4cb9b905f1728d6fbf0f_0.geojson";
 		try {
-			URL restURL = new URL(sRestURL);
-			HttpURLConnection httpConnection = (HttpURLConnection) restURL
+			URL restURL = new URL(sRESTUrl);
+			HttpURLConnection httpConn = (HttpURLConnection) restURL
 					.openConnection();
-			httpConnection.setRequestMethod("GET");
-			httpConnection.setRequestProperty("Accept", "application/json");
+			httpConn.setRequestMethod("GET");
+			httpConn.setRequestProperty("Accept", "application/json");
 
-			if (httpConnection.getResponseCode() != 200) {
+			if (httpConn.getResponseCode() != 200) {
 				throw new RuntimeException(
 						"HTTP GET Request Failed with Error code : "
-								+ httpConnection.getResponseCode());
+								+ httpConn.getResponseCode());
 			}
 
+			// Read RESTUrl response.
 			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					(httpConnection.getInputStream())));
+					(httpConn.getInputStream())));
 
+			// Process and aggregate critical-resources in hospitals CountyWise.
 			JSONObject hospitals = new JSONObject(new JSONTokener(reader));
 			JSONArray features = hospitals.getJSONArray("features");
-			// NAME NAICS_DESC ZIP COUNTYFIPS COUNTY TTL_STAFF BEDS STATUS
-			// POPULATION,
+			
+			// NAME NAICS_DESC ZIP COUNTYFIPS COUNTY TTL_STAFF BEDS STATUS, POPULATION,
 
 			JSONObject property = new JSONObject();
-
-			HashMap<String, JSONObject> countyWiseAnalysed = new HashMap<String, JSONObject>();
+			HashMap<String, JSONObject> aggregateCountyWise = new HashMap<String, JSONObject>();
 			JSONObject county = null;
 
 			String ZIP, COUNTYFIPS, COUNTY, STATUS = null;
 			int TTL_STAFF, BEDS, POPULATION;
 
 			for (Object feature : features) {
+				
 				if (feature instanceof JSONObject) {
 					property = (JSONObject) feature;
 					property = property.getJSONObject("properties");
 					
-					// Set CountyFIPS as the key, if exists aggregate hospital-resources.
+					// Use CountyFIPS as key, if exists aggregate hospital-resources.
 					COUNTYFIPS = property.getString("COUNTYFIPS");
-					if (countyWiseAnalysed.containsKey(COUNTYFIPS)) {
+					if (aggregateCountyWise.containsKey(COUNTYFIPS)) {
 						
 						// Get existing hospital-attributes
 						TTL_STAFF = property.getInt("TTL_STAFF");
 						BEDS = property.getInt("BEDS");
 						POPULATION = property.getInt("POPULATION");
+						COUNTY = property.getString("COUNTY");
+						ZIP = property.getString("ZIP");
 
 						// Aggregate countywise hospitals' resources
-						county = countyWiseAnalysed.get(COUNTYFIPS);
+						county = aggregateCountyWise.get(COUNTYFIPS);
+						county.put("COUNTY", COUNTY);
+						county.put("ZIP", ZIP);
 						county.put("TTL_STAFF", county.getInt("TTL_STAFF") + TTL_STAFF);
 						county.put("BEDS", county.getInt("BEDS") + BEDS);
 						county.put("POPULATION", county.getInt("POPULATION") + POPULATION);
 
 						// Replace the existing with aggregated values;
-						countyWiseAnalysed.replace(COUNTYFIPS, county);
+						aggregateCountyWise.replace(COUNTYFIPS, county);
+						
 					} else { // Initialize CountyObject for aggregation
 						county = new JSONObject();
 						county.put("NAME",  property.getString("NAME"));
@@ -166,19 +171,21 @@ public class HIFLDOpenDataParser implements ModelParser {
 						county.put("BEDS",  property.getInt("BEDS"));
 						county.put("POPULATION",  property.getInt("POPULATION"));
 						
-						countyWiseAnalysed.put(COUNTYFIPS, county);
-					}					
+						aggregateCountyWise.put(COUNTYFIPS, county);					
+					}
 				}
 			}
 
 			reader.close();
-			httpConnection.disconnect();
-			System.out.println("Done : Aggregate-report of countywise critical-resource in USA Hosptials");
-			System.out.println("Number of records in aggregate-report:" +countyWiseAnalysed.size());
+			httpConn.disconnect();
+			
+			System.out.println("Done: Aggregate-report of countywise critical-resource in USA-hosptials");
+			System.out.println("No.s of records in the report:" +aggregateCountyWise.size());
+			//Clear hashMap in the end.
+			aggregateCountyWise.clear();
 			
 			//String xml = this.convertJSONToXML(countyWiseAnalysed.values().toString(), "CountyWiseAggregated");
 			//System.out.print(xml);
-
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
