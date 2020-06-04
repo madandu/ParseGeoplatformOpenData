@@ -178,8 +178,8 @@ public class HIFLDOpenDataParser implements ModelParser {
 			reader.close();
 			httpConn.disconnect();
 			
-			System.out.println("Done: Aggregate-report of countywise critical-resource in USA-hosptials");
-			System.out.println("No.s of records in the report:" +aggregateCountyWise.size());
+			System.out.println("Completed countywise aggregate of critical hospital-resources.");
+			System.out.println(aggregateCountyWise.size() +" entries were processed.");
 			//Clear hashMap in the end.
 			aggregateCountyWise.clear();
 			

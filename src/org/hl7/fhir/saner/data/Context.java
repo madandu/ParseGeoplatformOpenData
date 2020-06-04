@@ -1,6 +1,5 @@
 package org.hl7.fhir.saner.data;
 
-
 /**
  * @author madan upadhyay
  * email: madandu@gmail.com
