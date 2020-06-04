@@ -6,6 +6,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ * @author madan upadhyay
+ * email: madandu@gmail.com
+ */
 public class Model {
 
 	private Context context = null;

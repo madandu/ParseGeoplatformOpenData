@@ -1,7 +1,7 @@
 package org.hl7.fhir.saner.parser;
 
 import org.hl7.fhir.saner.data.Model;
-import org.json.HTTP;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,14 +17,13 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
+
+/**
+ * @author madan upadhyay
+ * email: madandu@gmail.com
+ */
 public class HIFLDOpenDataParser implements ModelParser {
 
 	private Model model = null;
