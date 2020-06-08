@@ -55,6 +55,10 @@ public class HIFLDOpenDataParser implements ModelParser {
 		case XML:
 			ParseXML();
 			break;
+			
+		case REST:
+			QueryAndParseRESTUrl();
+			break;
 
 		default:
 			break;
@@ -70,6 +74,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 		JSONObject jso = null;
 
 		try (FileReader reader = new FileReader(this.model.Context().Source())) {
+			
 			JSONTokener tokener = new JSONTokener(reader);
 			jso = new JSONObject(tokener);
 
@@ -97,12 +102,16 @@ public class HIFLDOpenDataParser implements ModelParser {
 	}
 
 	/**
-	 * Query opendata-API for USA-hosptials' dataset and analyze JSON output.
+	 * Query opendata-API for USA-hospitals' records and parse JSON output.
 	 */
-	public static void QueryRESTUrlAndAnalyzeData(String sRESTUrl) {
+	public void QueryAndParseRESTUrl() {
 
 		try {
-			URL restURL = new URL(sRESTUrl);
+			
+			URL restURL = new URL(this.model.Context().Source());
+			
+			long startTime = System.currentTimeMillis();
+
 			HttpURLConnection httpConn = (HttpURLConnection) restURL
 					.openConnection();
 			httpConn.setRequestMethod("GET");
@@ -124,11 +133,9 @@ public class HIFLDOpenDataParser implements ModelParser {
 			
 			// NAME NAICS_DESC ZIP COUNTYFIPS COUNTY TTL_STAFF BEDS STATUS, POPULATION,
 
-			JSONObject property = new JSONObject();
 			HashMap<String, JSONObject> aggregateCountyWise = new HashMap<String, JSONObject>();
-			JSONObject county = null;
-
-			String ZIP, COUNTYFIPS, COUNTY, STATUS = null;
+			JSONObject property, county = null;
+			String ZIP, COUNTYFIPS, COUNTY = null;
 			int TTL_STAFF, BEDS, POPULATION;
 
 			for (Object feature : features) {
@@ -174,12 +181,14 @@ public class HIFLDOpenDataParser implements ModelParser {
 					}
 				}
 			}
-
 			reader.close();
 			httpConn.disconnect();
+			long endTime = System.currentTimeMillis();
 			
-			System.out.println("Completed countywise aggregate of critical hospital-resources.");
-			System.out.println(aggregateCountyWise.size() +" entries were processed.");
+			System.out.println("Completed: Countywise aggregate of critical-resources in hospitals.");
+			System.out.println("Processed: " +aggregateCountyWise.size() +" records of hospitals.");
+			System.out.println("It took " + (endTime - startTime) +" Milliseconds to get and process records");
+
 			//Clear hashMap in the end.
 			aggregateCountyWise.clear();
 			

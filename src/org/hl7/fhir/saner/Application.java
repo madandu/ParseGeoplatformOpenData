@@ -15,32 +15,35 @@ public class Application {
 	 */
 	public static void main(String[] args) {
 		
-		AnalyzeOpenDataAtRESTUrl();
+		OpenAndAnalyzeRESTUrl();
 		
-		//AnalyzeOpenDataFromFile(_sourcePath);
+		//OpenAndAnalyzeFile(_sourcePath);
 	    //Read results on console.
 	}
 	
 	/** Load and parse HIFLD open-data of USA based hospitals
 	 */
-	private static void AnalyzeOpenDataAtRESTUrl()
+	private static void OpenAndAnalyzeRESTUrl()
 	{
 		// Initial use JSONParser to load HIFLD hospitals' open-data.
 		final String sRESTUrl = "https://opendata.arcgis.com/datasets/6ac5e325468c4cb9b905f1728d6fbf0f_0.geojson";
-		HIFLDOpenDataParser.QueryRESTUrlAndAnalyzeData(sRESTUrl);
+		final Context ctx = new Context(sRESTUrl, Context.Type.REST);
+		final Model model = new Model(ctx);
+		final HIFLDOpenDataParser hldParser = new HIFLDOpenDataParser(model);
+		hldParser.parseData();
 	}
 	
 	/** Load and parse json file @ sourcePath on local file-system
 	 */
-	private static void AnalyzeOpenDataFromFile(String _sourcePath)
+	private static void OpenAndAnalyzeFile(String _srcPath)
 	{
 		// Initial use JSONParser to load HIFLD hospitals' open-data.
-		if (_sourcePath == null || _sourcePath.isEmpty()){
-			_sourcePath = "./data/hifld/hifld-geoplatform.opendata.arcgis.com.api.json";
+		if (_srcPath == null || _srcPath.isEmpty()){
+			_srcPath = "./data/hifld/hifld-geoplatform.opendata.arcgis.com.api.json";
+			final Context ctx = new Context(_srcPath, Context.Type.JSON);
+			final Model model = new Model(ctx);
+			final HIFLDOpenDataParser hldParser = new HIFLDOpenDataParser(model);
+			hldParser.parseData();
 		}
-		final Context ctx = new Context(_sourcePath, Context.Type.JSON);
-		final Model model = new Model(ctx);
-		final HIFLDOpenDataParser hldParser = new HIFLDOpenDataParser(model);
-		hldParser.parseData();
 	}
 }

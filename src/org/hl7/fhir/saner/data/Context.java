@@ -13,6 +13,7 @@ public class Context {
 	    JSON,
 	    XML,
 	    CSV,
+	    REST,
 	    SQL
 	}
 	
