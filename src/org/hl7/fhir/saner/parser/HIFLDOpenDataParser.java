@@ -19,11 +19,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
-
 /**
  * @author Madan Upadhyay
- * @email: madandu@gmail.com
- *  Parse for HIFLD opendata to parse variety of data.
+ * @email: madandu@gmail.com Parse for HIFLD opendata to parse variety of data.
  */
 public class HIFLDOpenDataParser implements ModelParser {
 
@@ -32,8 +30,9 @@ public class HIFLDOpenDataParser implements ModelParser {
 	/**
 	 * Constructor
 	 * 
-	 * @param data has absolute or relative-path to the source data
-	 *  and data-type JSON, CSV file,  URL or XML.
+	 * @param data
+	 *            has absolute or relative-path to the source data and data-type
+	 *            JSON, CSV file, URL or XML.
 	 */
 	public HIFLDOpenDataParser(Model _data) {
 		this.model = _data;
@@ -41,21 +40,22 @@ public class HIFLDOpenDataParser implements ModelParser {
 
 	/**
 	 * Parses source-file based on data-context
+	 * 
 	 * @return prints-out attributes of source-file
 	 */
 	public void parseData() {
 
 		switch (this.model.Context().Type()) {
 		case JSON:
-			ParseJSON(this.model.Context().Source());
+			parseJSON(this.model.Context().Source());
 			break;
 
 		case XML:
-			ParseXML(this.model.Context().Source());
+			parseXML(this.model.Context().Source());
 			break;
-			
+
 		case REST:
-			QueryAndParseRESTUrl(this.model.Context().Source());
+			queryAndParseRESTUrl(this.model.Context().Source());
 			break;
 
 		default:
@@ -66,95 +66,51 @@ public class HIFLDOpenDataParser implements ModelParser {
 
 	/**
 	 * Parses JSONObject Prints out all hospitals' attributes within JSONObject.
-	 * @param	the path to JSON file
+	 * 
+	 * @param the
+	 *            path to JSON file
 	 */
-	private void ParseJSON(String jsonFilePath) {
-
-		JSONObject jso = null;
+	private void parseJSON(String jsonFilePath) {
 
 		try (FileReader reader = new FileReader(jsonFilePath)) {
-			
+
 			JSONTokener tokener = new JSONTokener(reader);
-			jso = new JSONObject(tokener);
-
-			JSONArray jArr = null;
-			jArr = jso.getJSONArray("features");
-			System.out.println("Begin: listing all hospital]s attributes");
-
-			for (Object item : jArr) {
-				if (item instanceof JSONObject) {
-					JSONObject hospitalAttributes = ((JSONObject) item)
-							.getJSONObject("attributes");
-					System.out.println(hospitalAttributes);
-				}
-			}
-
-			System.out.println("End.");
-
+			JSONObject jso = new JSONObject(tokener);
+			
+			parseCountyWise(jso);
+			
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (JSONException e) {
 			e.printStackTrace();
-		}
+		}		
 	}
-
-	/**
-	 * Query opendata-API for USA-hospitals' records and parse JSON output.
-	 * @param	the URL of RESTful query to GET data.
-	 */
-	public void QueryAndParseRESTUrl(String RESTUrl) {
-
-		try {
-
-			URL restURL = new URL(RESTUrl);
-
-			long startTime = System.currentTimeMillis();
-
-			System.out.println("Open HIFLD url to get hospitals-records.");
-
-			HttpURLConnection httpConn = (HttpURLConnection) restURL
-					.openConnection();
-			httpConn.setRequestMethod("GET");
-			httpConn.setRequestProperty("Accept", "application/json");
-
-			if (httpConn.getResponseCode() != 200) {
-				throw new RuntimeException(
-						"HTTP GET Request Failed with Error code : "
-								+ httpConn.getResponseCode());
-			}
-
-			// TODO make reading more efficient to handle large data from RESTUrl.
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					(httpConn.getInputStream())));
-
-			// Process and aggregate critical-resources in hospitals-records CountyWise.
-			JSONObject hospitals = new JSONObject(new JSONTokener(reader));
-			System.out.println("Done reading of hospital-records, now close HIFLD url-connection.");
 	
-			reader.close();
-			httpConn.disconnect();
-			
-			System.out.println("Start processing HIFLD hospital-records.");
-			JSONArray features = hospitals.getJSONArray("features");
-		
-			// NAME NAICS_DESC ZIP COUNTYFIPS COUNTY TTL_STAFF BEDS STATUS, POPULATION,
+	private void parseCountyWise(JSONObject jso) {
+
+		try  {	
+			System.out.println("Start processing HIFLD hospital-records county-wise.");
+			JSONArray features = jso.getJSONArray("features");
+
+			// NAME NAICS_DESC ZIP COUNTYFIPS COUNTY TTL_STAFF BEDS STATUS,
+			// POPULATION,
 			HashMap<String, JSONObject> aggregateCountyWise = new HashMap<String, JSONObject>();
 			JSONObject property, county = null;
 			String ZIP, COUNTYFIPS, COUNTY = null;
 			int TTL_STAFF, BEDS, POPULATION;
 
 			for (Object feature : features) {
-				
+
 				if (feature instanceof JSONObject) {
 					property = (JSONObject) feature;
 					property = property.getJSONObject("properties");
-					
-					// Use CountyFIPS as key, if exists aggregate hospital-resources.
+
+					// Use CountyFIPS as key, if exists aggregate critical hospital-resources.
 					COUNTYFIPS = property.getString("COUNTYFIPS");
-					
-					if (aggregateCountyWise.containsKey(COUNTYFIPS)) {	
+
+					if (aggregateCountyWise.containsKey(COUNTYFIPS)) {
 						// Get existing hospital-attributes
 						TTL_STAFF = property.getInt("TTL_STAFF");
 						BEDS = property.getInt("BEDS");
@@ -164,52 +120,91 @@ public class HIFLDOpenDataParser implements ModelParser {
 
 						// Aggregate county-wise hospitals' resources
 						county = aggregateCountyWise.get(COUNTYFIPS);
-						county .put("COUNTY", COUNTY);
+						county.put("COUNTY", COUNTY);
 						county.put("ZIP", ZIP);
-						county.put("TTL_STAFF", county.getInt("TTL_STAFF") + TTL_STAFF);
+						county.put("TTL_STAFF", county.getInt("TTL_STAFF") +TTL_STAFF);
 						county.put("BEDS", county.getInt("BEDS") + BEDS);
-						county.put("POPULATION", county.getInt("POPULATION") + POPULATION);
+						county.put("POPULATION", county.getInt("POPULATION")	+POPULATION);
 
 						// Replace the existing with aggregated values;
 						aggregateCountyWise.replace(COUNTYFIPS, county);
-						
+
 					} else { // Initialize CountyObject for aggregation
 						county = new JSONObject();
-						county.put("NAME",  property.getString("NAME"));
-						county.put("NAICS_DESC",  property.getString("NAICS_DESC"));
-						county.put("COUNTY",  property.getString("COUNTY"));
-						county.put("COUNTYFIPS",  property.getString("COUNTYFIPS"));
-						county.put("ZIP",  property.getInt("ZIP"));
-						county.put("TTL_STAFF",  property.getInt("TTL_STAFF"));
-						county.put("BEDS",  property.getInt("BEDS"));
-						county.put("POPULATION",  property.getInt("POPULATION"));
-						
-						aggregateCountyWise.put(COUNTYFIPS, county);					
+						county.put("NAME", property.getString("NAME"));
+						county.put("NAICS_DESC", property.getString("NAICS_DESC"));
+						county.put("COUNTY", property.getString("COUNTY"));
+						county.put("COUNTYFIPS", property.getString("COUNTYFIPS"));
+						county.put("ZIP", property.getInt("ZIP"));
+						county.put("TTL_STAFF", property.getInt("TTL_STAFF"));
+						county.put("BEDS", property.getInt("BEDS"));
+						county.put("POPULATION", property.getInt("POPULATION"));
+
+						aggregateCountyWise.put(COUNTYFIPS, county);
 					}
 				}
 			}
-			long endTime = System.currentTimeMillis();	
-			System.out.println("Processed " +aggregateCountyWise.size() +" records of critical-resources in hospitals county-wise.");
-			System.out.println("Took " + (endTime - startTime) +" milliseconds to get and process records.");
+			System.out.println("Processed " + aggregateCountyWise.size()	+" records of critical-resources in hospitals.");
+			// Clear hashMap in the end.
+			aggregateCountyWise.clear();	
 
-			//Clear hashMap in the end.
-			aggregateCountyWise.clear();
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Query opendata-API for USA-hospitals' records and parse JSON output.
+	 * 
+	 * @param the
+	 *            URL of RESTful query to GET data.
+	 */
+	public void queryAndParseRESTUrl(String urlPath) {
+		
+		// Compute time taken to get/parse output from RESTUrl.
+		long startTime = System.currentTimeMillis();
+
+		try {
 			
+			URL url = new URL(urlPath);
+
+			System.out.println("Open HIFLD url to get hospitals-records.");
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setRequestMethod("GET");
+			conn.setRequestProperty("Accept", "application/json");
+
+			if (conn.getResponseCode() != 200) {
+				throw new RuntimeException("HTTP GET Request Failed with Error code : "+ conn.getResponseCode());
+			}
+
+			// TODO make reading more efficient to handle large data from RESTUrl.
+			BufferedReader reader = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+
+			JSONObject hospitals = new JSONObject(new JSONTokener(reader));
+			reader.close();
+			conn.disconnect();
+			System.out.println("Done reading of hospital-records,  closed HIFLD url-connection.");	
+
+			// Process and aggregate critical-resources in hospitals-records county-wise.
+			parseCountyWise(hospitals);
+
+			long endTime = System.currentTimeMillis();
+			System.out.println("Took " + (endTime - startTime)+ " milliseconds to get and process records.");
+
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Parses XML Prints out all hospitals' attributes within XMLObject.
-	 *
 	 */
-	private void ParseXML(String xmlFilePath) {
+	private void parseXML(String xmlFilePath) {
 
 		try (FileReader reader = new FileReader(xmlFilePath)) {
-			//TODO  Read and parse XML
+			// TODO Read and parse XML
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -220,14 +215,13 @@ public class HIFLDOpenDataParser implements ModelParser {
 	}
 
 	/**
-	 * Converts JSON object to XML 
-	 * returns XML string.
-	*/
+	 * Converts JSON object to XML returns XML string.
+	 */
 	private String convertJSONToXMLReport(String jsonObject, String root)
 			throws JSONException {
 		String xml = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<"
 				+ root + ">" + XML.toString(jsonObject) + "</" + root + ">";
-		
+
 		return xml;
 	}
 }
