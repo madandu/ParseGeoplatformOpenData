@@ -67,8 +67,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 	/**
 	 * Parses JSONObject Prints out all hospitals' attributes within JSONObject.
 	 * 
-	 * @param the
-	 *            path to JSON file
+	 * @param path to JSON file
 	 */
 	private void parseJSON(String jsonFilePath) {
 
@@ -76,6 +75,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 
 			JSONTokener tokener = new JSONTokener(reader);
 			JSONObject jso = new JSONObject(tokener);
+			reader.close();
 			
 			parseCountyWise(jso);
 			
@@ -88,10 +88,16 @@ public class HIFLDOpenDataParser implements ModelParser {
 		}		
 	}
 	
+	/**
+	 * Parses JSONObject to get county-wise critical-resource in hospitals.
+	 * 
+	 * @param JSON object containing records.
+	 */
 	private void parseCountyWise(JSONObject jso) {
 
-		try  {	
-			System.out.println("Start processing HIFLD hospital-records county-wise.");
+		try  {
+			
+			System.out.println("Processing HIFLD hospitals-records county-wise.....");
 			JSONArray features = jso.getJSONArray("features");
 
 			// NAME NAICS_DESC ZIP COUNTYFIPS COUNTY TTL_STAFF BEDS STATUS,
@@ -144,7 +150,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 					}
 				}
 			}
-			System.out.println("Processed " + aggregateCountyWise.size()	+" records of critical-resources in hospitals.");
+			System.out.println("Processed " + aggregateCountyWise.size()	+" records to count critical-resource in hospitals.");
 			// Clear hashMap in the end.
 			aggregateCountyWise.clear();	
 
@@ -156,19 +162,20 @@ public class HIFLDOpenDataParser implements ModelParser {
 	/**
 	 * Query opendata-API for USA-hospitals' records and parse JSON output.
 	 * 
-	 * @param the
-	 *            URL of RESTful query to GET data.
+	 * @param the URL of RESTful query to GET data.
 	 */
 	public void queryAndParseRESTUrl(String urlPath) {
 		
-		// Compute time taken to get/parse output from RESTUrl.
-		long startTime = System.currentTimeMillis();
-
 		try {
 			
 			URL url = new URL(urlPath);
 
-			System.out.println("Open HIFLD url to get hospitals-records.");
+			System.out.println("Connecting HIFLD url to get hospitals-records......");
+			
+			// Compute time taken to get/parse output from RESTUrl.
+			long startTime = System.currentTimeMillis();
+			
+			// TODO Make HTTP UrlConnection more efficient and handle connection time-outs.
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			conn.setRequestMethod("GET");
 			conn.setRequestProperty("Accept", "application/json");
@@ -179,17 +186,15 @@ public class HIFLDOpenDataParser implements ModelParser {
 
 			// TODO make reading more efficient to handle large data from RESTUrl.
 			BufferedReader reader = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-
 			JSONObject hospitals = new JSONObject(new JSONTokener(reader));
-			reader.close();
+
 			conn.disconnect();
-			System.out.println("Done reading of hospital-records,  closed HIFLD url-connection.");	
+			reader.close();
 
 			// Process and aggregate critical-resources in hospitals-records county-wise.
 			parseCountyWise(hospitals);
 
-			long endTime = System.currentTimeMillis();
-			System.out.println("Took " + (endTime - startTime)+ " milliseconds to get and process records.");
+			System.out.println("Took " + (System.currentTimeMillis() - startTime)+ " milliseconds to get/process records.");
 
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
