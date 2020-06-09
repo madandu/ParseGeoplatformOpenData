@@ -42,7 +42,7 @@ public class Application {
 	{
 		// Use default local-file no filePath provided.
 		if (_jsonFilePath == null || _jsonFilePath.isEmpty()){
-			_jsonFilePath = "./data/hifld/hifld-geoplatform.opendata.arcgis.com.api.json";			
+			_jsonFilePath = "data/hifld-geoplatform.opendata.arcgis.com.api.json";			
 			// TODO report exception if source FilePath is not found.
 
 			final Context ctx = new Context(_jsonFilePath, Context.Type.JSON);
