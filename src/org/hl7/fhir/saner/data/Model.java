@@ -1,11 +1,5 @@
 package org.hl7.fhir.saner.data;
 
-import org.json.*;
-
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-
 /**
  * @author madan upadhyay
  * email: madandu@gmail.com
@@ -17,8 +11,7 @@ public class Model {
 	/**
 	 * Constructor
 	 * 
-	 * @param Context
-	 *            for source/data.
+	 * @param Context like data source, file-path, url.
 	 */
 	public Model(Context _ctx) {
 		this.context = _ctx;
@@ -27,39 +20,5 @@ public class Model {
 		
 	public Context Context(){
 		return this.context;
-	}
-
-	public JSONObject loadJSON() {
-		JSONObject jso = null;
-
-		try (FileReader reader = new FileReader(context.Source())) {
-			JSONTokener tokener = new JSONTokener(reader);
-			jso = new JSONObject(tokener);		
-		} catch (FileNotFoundException e){
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-
-		return jso;
-	}
-
-	//TODO: Load xml content.
-	public org.json.XML loadXML() {
-		org.json.XML xmo = null;
-
-		try (FileReader reader = new FileReader(context.Source())){
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return xmo;
 	}
 }

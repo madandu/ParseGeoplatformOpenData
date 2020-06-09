@@ -3,10 +3,9 @@ package org.hl7.fhir.saner;
 import org.hl7.fhir.saner.data.*;
 import org.hl7.fhir.saner.parser.*;
 
-
 /**
- * @author madan upadhyay
- * email: madandu@gmail.com
+ * @author Madan Upadhyay
+ * @email: madandu@gmail.com
  */
 public class Application {
 
@@ -33,14 +32,15 @@ public class Application {
 		hldParser.parseData();
 	}
 	
-	/** Load and parse json file @ sourcePath on local file-system
+	/** Open and parse json file @ sourcePath on local file-system
 	 */
-	private static void OpenAndAnalyzeFile(String _srcPath)
+	private static void OpenAndAnalyzeJSONFile(String _jsonFilePath)
 	{
 		// Initial use JSONParser to load HIFLD hospitals' open-data.
-		if (_srcPath == null || _srcPath.isEmpty()){
-			_srcPath = "./data/hifld/hifld-geoplatform.opendata.arcgis.com.api.json";
-			final Context ctx = new Context(_srcPath, Context.Type.JSON);
+		if (_jsonFilePath == null || _jsonFilePath.isEmpty()){
+			// TODO report exception for source FilePath not found.
+			_jsonFilePath = "./data/hifld/hifld-geoplatform.opendata.arcgis.com.api.json";
+			final Context ctx = new Context(_jsonFilePath, Context.Type.JSON);
 			final Model model = new Model(ctx);
 			final HIFLDOpenDataParser hldParser = new HIFLDOpenDataParser(model);
 			hldParser.parseData();

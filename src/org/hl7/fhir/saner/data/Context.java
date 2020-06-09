@@ -1,7 +1,7 @@
 package org.hl7.fhir.saner.data;
 
 /**
- * @author madan upadhyay
+ * @author Madan Upadhyay
  * email: madandu@gmail.com
  */
 public class Context {
