@@ -14,18 +14,22 @@ public class Application {
 	 */
 	public static void main(String[] args) {
 		
-		openAndAnalyzeRESTUrl();
+		//Default is read and parse JSON from local file-path		
+		openAndAnalyzeJSONFile("");
 		
-		//OpenAndAnalyzeFile(_sourcePath);
+		//openAndAnalyzeRESTUrl("");
+		
 	    //Read results on console.
 	}
 	
 	/** Load and parse HIFLD open-data of USA based hospitals
 	 */
-	private static void openAndAnalyzeRESTUrl()
+	private static void openAndAnalyzeRESTUrl(String sRESTUrl)
 	{
-		// Initial use JSONParser to load HIFLD hospitals' open-data.
-		final String sRESTUrl = "https://opendata.arcgis.com/datasets/6ac5e325468c4cb9b905f1728d6fbf0f_0.geojson";
+		// Use default url if no url provided.
+		if (sRESTUrl == null || sRESTUrl.isEmpty())
+		sRESTUrl = "https://opendata.arcgis.com/datasets/6ac5e325468c4cb9b905f1728d6fbf0f_0.geojson";
+		
 		final Context ctx = new Context(sRESTUrl, Context.Type.REST);
 		final Model model = new Model(ctx);
 		final HIFLDOpenDataParser hldParser = new HIFLDOpenDataParser(model);
@@ -36,11 +40,11 @@ public class Application {
 	 */
 	private static void openAndAnalyzeJSONFile(String _jsonFilePath)
 	{
-		// Initial use JSONParser to load HIFLD hospitals' open-data.
+		// Use default local-file no filePath provided.
 		if (_jsonFilePath == null || _jsonFilePath.isEmpty()){
+			_jsonFilePath = "./data/hifld/hifld-geoplatform.opendata.arcgis.com.api.json";			
 			// TODO report exception if source FilePath is not found.
-			_jsonFilePath = "./data/hifld/hifld-geoplatform.opendata.arcgis.com.api.json";
-			
+
 			final Context ctx = new Context(_jsonFilePath, Context.Type.JSON);
 			final Model model = new Model(ctx);
 			final HIFLDOpenDataParser hldParser = new HIFLDOpenDataParser(model);

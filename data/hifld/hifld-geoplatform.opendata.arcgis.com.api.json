@@ -1923,6 +1923,8 @@
             "WEBSITE": "http://www.arh.org/locations/tug_valley.aspx",
             "STATE_ID": "100368",
             "ALT_NAME": "WILLIAMSON ARH HOSPITAL",
+            "TTL_STAFF": 999,
+            "BEDS": 358,
 			}
 		},
 		]
