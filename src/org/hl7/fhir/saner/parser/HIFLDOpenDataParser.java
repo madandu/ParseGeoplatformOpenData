@@ -158,7 +158,6 @@ public class HIFLDOpenDataParser implements ModelParser {
 	 * @param JSON object containing records.
 	 */
 	private void parseUrlCountyWise(JSONObject jso) {
-
 		try  {
 			
 			JSONArray features = jso.getJSONArray("features");
@@ -234,9 +233,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 	 * @param the URL of RESTful query to GET data.
 	 */
 	public void queryAndParseRESTUrl(String urlPath) {
-		
 		try {
-			
 			URL url = new URL(urlPath);
 			
 			System.out.println("Connecting HIFLD url to get hospitals-records......");
@@ -266,8 +263,8 @@ public class HIFLDOpenDataParser implements ModelParser {
 
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (IOException io) {
+			io.printStackTrace();
 		}
 	}
 

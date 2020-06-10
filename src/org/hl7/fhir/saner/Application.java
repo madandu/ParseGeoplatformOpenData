@@ -1,10 +1,5 @@
 package org.hl7.fhir.saner;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
-
 import org.hl7.fhir.saner.data.*;
 import org.hl7.fhir.saner.parser.*;
 
@@ -21,35 +16,40 @@ public class Application {
 	 */
 	public static void main(String[] args) {
 
-		// Read parser results on console.
-		try (InputStream inStream = Application.class.getClassLoader().getResourceAsStream("./config.properties")) {
-			
-			if (inStream == null) {
-				System.out.println(" 'config.properties' file not found.");
-				return;
-			}
-			Properties prop = new Properties();
-			prop.load(inStream);
-			String json = prop.getProperty("json.path");
-			String url = prop.getProperty("rest.url");
-			
-			inStream.close();
+		String dType, dPath = "";
 
-			openAndAnalyzeJSONFile(json);
-			openAndAnalyzeRESTUrl(url);
-			
-		} catch (FileNotFoundException e) {
-			System.out.println("'config.properties' are not valid.");
-		} catch (IOException io) {
-			io.printStackTrace();
-		} 
+		if (args.length > 1) {
+			dType = args[0].toUpperCase();
+			dPath = args[1];
+			// See parser results on console.
+			switch (dType) {
+			case "REST":
+				openAndAnalyzeRESTUrl(dPath);
+				break;
+			case "XML":
+				break;
+				
+			case "JSON":
+				openAndAnalyzeJSONFile(dPath);
+				break;
+			default: 
+				System.out.println("Valid arguments are: ");
+				System.out.println("JSON	'full-path to JSON file' ");
+				System.out.println("REST	'full-url of  resource at RESTful service");
+			}
+		}
+		else {
+			System.out.println("Valid arguments are: ");
+			System.out.println("JSON	'full-path to JSON file' ");
+			System.out.println("REST	'full-url of  resource at RESTful service");
+			}
 	}
 
 	/**
 	 * Load and parse HIFLD open-data of USA based hospitals
 	 */
 	private static void openAndAnalyzeRESTUrl(String sRESTUrl) {
-		
+
 		if (sRESTUrl == null || sRESTUrl.isBlank())
 			return;
 		else {
@@ -64,7 +64,7 @@ public class Application {
 	 * Open and parse json file @ sourcePath on local file-system
 	 */
 	private static void openAndAnalyzeJSONFile(String _jsonFilePath) {
-		
+
 		if (_jsonFilePath == null || _jsonFilePath.isBlank())
 			return;
 		else {
