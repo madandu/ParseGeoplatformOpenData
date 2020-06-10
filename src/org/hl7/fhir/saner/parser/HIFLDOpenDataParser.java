@@ -132,11 +132,11 @@ public class HIFLDOpenDataParser implements ModelParser {
 			//Validate code:
 			  System.out.println("Aggregated critical-resources county-wise:" ); 
 				for (String key : aggregateCountyWise.keySet()) {
-					System.out.println(aggregateCountyWise.get(key).getString("COUNTRY")+ ","
-							+ aggregateCountyWise.get(key).getString("STATE")+ ","
-							+ aggregateCountyWise.get(key).getString("COUNTY")+ ":"
-							+ "Population="+ aggregateCountyWise.get(key).getInt("POPULATION")+ ","
-							+ "TTL_Staff="+ aggregateCountyWise.get(key).getInt("TTL_STAFF")+ ","
+					System.out.println(aggregateCountyWise.get(key).getString("COUNTRY")+ ", "
+							+ aggregateCountyWise.get(key).getString("STATE")+ ", "
+							+ aggregateCountyWise.get(key).getString("COUNTY")+ ": "
+							+ "Population="+ aggregateCountyWise.get(key).getInt("POPULATION")+ ", "
+							+ "TTL_Staff="+ aggregateCountyWise.get(key).getInt("TTL_STAFF")+ ", "
 							+ "Beds="+ aggregateCountyWise.get(key).getInt("BEDS"));
 				}
 			  
@@ -212,11 +212,11 @@ public class HIFLDOpenDataParser implements ModelParser {
 			//Validate results:
 		    System.out.println("Aggregated critical-resources county-wise:" ); 
 			for (String key : aggregateCountyWise.keySet()) {
-				System.out.println(aggregateCountyWise.get(key).getString("COUNTRY")+ ","
-						+ aggregateCountyWise.get(key).getString("STATE")+ ","
-						+ aggregateCountyWise.get(key).getString("COUNTY")+ ":"
-						+ "Population="+ aggregateCountyWise.get(key).getInt("POPULATION")+ ","
-						+ "TTL_Staff="+ aggregateCountyWise.get(key).getInt("TTL_STAFF")+ ","
+				System.out.println(aggregateCountyWise.get(key).getString("COUNTRY")+ ", "
+						+ aggregateCountyWise.get(key).getString("STATE")+ ", "
+						+ aggregateCountyWise.get(key).getString("COUNTY")+ ": "
+						+ "Population="+ aggregateCountyWise.get(key).getInt("POPULATION")+ ", "
+						+ "TTL_Staff="+ aggregateCountyWise.get(key).getInt("TTL_STAFF")+ ", "
 						+ "Beds="+ aggregateCountyWise.get(key).getInt("BEDS"));
 			}
 			
