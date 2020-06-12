@@ -6,7 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.json.XML;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -75,52 +74,42 @@ public class HIFLDOpenDataParser implements ModelParser {
 		try (FileReader reader = new FileReader(jsonFilePath)) {
 
 			JSONTokener tokener = new JSONTokener(reader);
+			
 			JSONObject jso = new JSONObject(tokener);
 			reader.close();
 			
 			System.out.println("Processing HIFLD hospitals-records.....");
-			JSONArray features = jso.getJSONArray("features");
+			JSONArray attributes = jso.getJSONArray("features");
 
 			HashMap<String, JSONObject> aggregateCountyWise = new HashMap<String, JSONObject>();
-			JSONObject attributes, county = null;
 			String COUNTYFIPS  = null;
-			int TTL_STAFF, BEDS, POPULATION;
+			JSONObject attribute, county = null;
 
-			for (Object feature : features) {
-
-				if (feature instanceof JSONObject) {
-					attributes = ((JSONObject) feature).getJSONObject("attributes");
-
+			for (Object item : attributes) {
+				if (item instanceof JSONObject) {
+					attribute = ((JSONObject)item).getJSONObject("attributes");
 					// Use CountyFIPS as key, if exists aggregate critical hospital-resources.
-					COUNTYFIPS = attributes.getString("COUNTYFIPS");
-					TTL_STAFF = attributes.getInt("TTL_STAFF");
-					BEDS = attributes.getInt("BEDS");
-					POPULATION = attributes.getInt("POPULATION");
-					
+					COUNTYFIPS = attribute.getString("COUNTYFIPS");
+
 					if (aggregateCountyWise.containsKey(COUNTYFIPS)) {
 						// Aggregate county-wise hospitals' resources
 						county = aggregateCountyWise.get(COUNTYFIPS);
-						county.put("COUNTRY", county.getString("COUNTRY"));
-						county.put("STATE", county.getString("STATE"));
-						county.put("COUNTY", county.getString("COUNTY"));
-						county.put("COUNTYFIPS", county.getString("COUNTYFIPS"));
-						county.put("POPULATION", county.getInt("POPULATION")	+POPULATION);
-						county.put("TTL_STAFF", county.getInt("TTL_STAFF") +TTL_STAFF);
-						county.put("BEDS", county.getInt("BEDS") + BEDS);
-
+						county.put("POPULATION", county.getInt("POPULATION")	+attribute.getInt("POPULATION"));
+						county.put("TTL_STAFF", county.getInt("TTL_STAFF") +attribute.getInt("TTL_STAFF"));
+						county.put("BEDS", county.getInt("BEDS") +attribute.getInt("BEDS"));
 						// Replace the existing with aggregated values;
 						aggregateCountyWise.replace(COUNTYFIPS, county);
 
 					} else { // Initialize CountyObject for aggregation
 						county = new JSONObject();
-						county.put("COUNTRY", attributes.getString("COUNTRY"));
-						county.put("STATE", attributes.getString("STATE"));
-						county.put("COUNTY", attributes.getString("COUNTY"));
+						county.put("COUNTRY", attribute.getString("COUNTRY"));
+						county.put("STATE", attribute.getString("STATE"));
+						county.put("COUNTY", attribute.getString("COUNTY"));
 						county.put("COUNTYFIPS", COUNTYFIPS);
-						county.put("POPULATION", POPULATION);
-						county.put("TTL_STAFF", TTL_STAFF);
-						county.put("BEDS", BEDS);
-
+						county.put("POPULATION", attribute.getInt("POPULATION"));
+						county.put("TTL_STAFF", attribute.getInt("TTL_STAFF"));
+						county.put("BEDS", attribute.getInt("BEDS"));
+						// Add new county object;
 						aggregateCountyWise.put(COUNTYFIPS, county);
 					}
 				}
@@ -160,44 +149,33 @@ public class HIFLDOpenDataParser implements ModelParser {
 			if (features == null || features.length() ==0) return;
 			
 			HashMap<String, JSONObject> aggregateCountyWise = new HashMap<String, JSONObject>();
-			JSONObject properties, county = null;
+			JSONObject property, county = null;
 			String COUNTYFIPS = null;
-			int TTL_STAFF, BEDS, POPULATION;
 
-			for (Object feature : features) {
-
-				if (feature instanceof JSONObject) {
-					properties = ((JSONObject) feature).getJSONObject("properties");
-
+			for (Object item : features) {
+				if (item instanceof JSONObject) {
+					property = ((JSONObject) item).getJSONObject("properties");
+					COUNTYFIPS = property.getString("COUNTYFIPS");
 					// Use CountyFIPS as key, if exists county, aggregate critical-resources in its hospitals.
-					COUNTYFIPS = properties.getString("COUNTYFIPS");
-					TTL_STAFF = properties.getInt("TTL_STAFF");
-					BEDS = properties.getInt("BEDS");
-					POPULATION = properties.getInt("POPULATION");
-
 					if (aggregateCountyWise.containsKey(COUNTYFIPS)) {
 						// Aggregate county-wise hospitals' resources
 						county = aggregateCountyWise.get(COUNTYFIPS);
-						county.put("COUNTRY", properties.getString("COUNTRY"));
-						county.put("STATE", properties.getString("STATE"));
-						county.put("COUNTY", properties.getString("COUNTY"));
-						county.put("COUNTYFIPS", COUNTYFIPS);
-						county.put("POPULATION", county.getInt("POPULATION")	+POPULATION);
-						county.put("TTL_STAFF", county.getInt("TTL_STAFF") +TTL_STAFF);
-						county.put("BEDS", county.getInt("BEDS") +BEDS);
+						county.put("POPULATION", county.getInt("POPULATION")	+property.getInt("POPULATION"));
+						county.put("TTL_STAFF", county.getInt("TTL_STAFF") +property.getInt("TTL_STAFF"));
+						county.put("BEDS", county.getInt("BEDS") +property.getInt("BEDS"));
 						// Replace the existing with aggregated values;
 						aggregateCountyWise.replace(COUNTYFIPS, county);
 						
 					} else { // Initialize CountyObject for aggregation
 						county = new JSONObject();
-						county.put("COUNTRY", properties.getString("COUNTRY"));
-						county.put("STATE", properties.getString("STATE"));
-						county.put("COUNTY", properties.getString("COUNTY"));
-						county.put("COUNTYFIPS",COUNTYFIPS);
-						county.put("POPULATION", POPULATION);
-						county.put("TTL_STAFF", TTL_STAFF);
-						county.put("BEDS", BEDS);
-
+						county.put("COUNTRY", property.getString("COUNTRY"));
+						county.put("STATE", property.getString("STATE"));
+						county.put("COUNTY", property.getString("COUNTY"));
+						county.put("COUNTYFIPS", COUNTYFIPS);
+						county.put("POPULATION", property.getInt("POPULATION"));
+						county.put("TTL_STAFF", property.getInt("TTL_STAFF"));
+						county.put("BEDS",  property.getInt("BEDS"));
+						// Add new county object;
 						aggregateCountyWise.put(COUNTYFIPS, county);
 					}
 				}
