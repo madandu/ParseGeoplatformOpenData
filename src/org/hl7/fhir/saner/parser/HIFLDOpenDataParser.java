@@ -81,24 +81,21 @@ public class HIFLDOpenDataParser implements ModelParser {
 			System.out.println("Processing HIFLD hospitals-records.....");
 			JSONArray features = jso.getJSONArray("features");
 
-			// NAME NAICS_DESC ZIP COUNTYFIPS COUNTY TTL_STAFF BEDS STATUS,
-			// POPULATION,
 			HashMap<String, JSONObject> aggregateCountyWise = new HashMap<String, JSONObject>();
-			JSONObject property, county = null;
+			JSONObject attributes, county = null;
 			String COUNTYFIPS  = null;
 			int TTL_STAFF, BEDS, POPULATION;
 
 			for (Object feature : features) {
 
 				if (feature instanceof JSONObject) {
-					property = (JSONObject) feature;
-					property = property.getJSONObject("attributes");
+					attributes = ((JSONObject) feature).getJSONObject("attributes");
 
 					// Use CountyFIPS as key, if exists aggregate critical hospital-resources.
-					COUNTYFIPS = property.getString("COUNTYFIPS");
-					TTL_STAFF = property.getInt("TTL_STAFF");
-					BEDS = property.getInt("BEDS");
-					POPULATION = property.getInt("POPULATION");
+					COUNTYFIPS = attributes.getString("COUNTYFIPS");
+					TTL_STAFF = attributes.getInt("TTL_STAFF");
+					BEDS = attributes.getInt("BEDS");
+					POPULATION = attributes.getInt("POPULATION");
 					
 					if (aggregateCountyWise.containsKey(COUNTYFIPS)) {
 						// Aggregate county-wise hospitals' resources
@@ -116,9 +113,9 @@ public class HIFLDOpenDataParser implements ModelParser {
 
 					} else { // Initialize CountyObject for aggregation
 						county = new JSONObject();
-						county.put("COUNTRY", property.getString("COUNTRY"));
-						county.put("STATE", property.getString("STATE"));
-						county.put("COUNTY", property.getString("COUNTY"));
+						county.put("COUNTRY", attributes.getString("COUNTRY"));
+						county.put("STATE", attributes.getString("STATE"));
+						county.put("COUNTY", attributes.getString("COUNTY"));
 						county.put("COUNTYFIPS", COUNTYFIPS);
 						county.put("POPULATION", POPULATION);
 						county.put("TTL_STAFF", TTL_STAFF);
@@ -139,7 +136,6 @@ public class HIFLDOpenDataParser implements ModelParser {
 							+ "TTL_Staff="+ aggregateCountyWise.get(key).getInt("TTL_STAFF")+ ", "
 							+ "Beds="+ aggregateCountyWise.get(key).getInt("BEDS"));
 				}
-			  
 				// Clear hashMap in the end.
 			  aggregateCountyWise.clear();	
 
@@ -158,34 +154,33 @@ public class HIFLDOpenDataParser implements ModelParser {
 	 * @param JSON object containing records.
 	 */
 	private void parseUrlCountyWise(JSONObject jso) {
-		try  {
-			
+				
+		try  {	
 			JSONArray features = jso.getJSONArray("features");
 			if (features == null || features.length() ==0) return;
 			
 			HashMap<String, JSONObject> aggregateCountyWise = new HashMap<String, JSONObject>();
-			JSONObject property, county = null;
+			JSONObject properties, county = null;
 			String COUNTYFIPS = null;
 			int TTL_STAFF, BEDS, POPULATION;
 
 			for (Object feature : features) {
 
 				if (feature instanceof JSONObject) {
-					property = (JSONObject) feature;
-					property = property.getJSONObject("properties");
+					properties = ((JSONObject) feature).getJSONObject("properties");
 
 					// Use CountyFIPS as key, if exists county, aggregate critical-resources in its hospitals.
-					COUNTYFIPS = property.getString("COUNTYFIPS");
-					TTL_STAFF = property.getInt("TTL_STAFF");
-					BEDS = property.getInt("BEDS");
-					POPULATION = property.getInt("POPULATION");
+					COUNTYFIPS = properties.getString("COUNTYFIPS");
+					TTL_STAFF = properties.getInt("TTL_STAFF");
+					BEDS = properties.getInt("BEDS");
+					POPULATION = properties.getInt("POPULATION");
 
 					if (aggregateCountyWise.containsKey(COUNTYFIPS)) {
 						// Aggregate county-wise hospitals' resources
 						county = aggregateCountyWise.get(COUNTYFIPS);
-						county.put("COUNTRY", property.getString("COUNTRY"));
-						county.put("STATE", property.getString("STATE"));
-						county.put("COUNTY", property.getString("COUNTY"));
+						county.put("COUNTRY", properties.getString("COUNTRY"));
+						county.put("STATE", properties.getString("STATE"));
+						county.put("COUNTY", properties.getString("COUNTY"));
 						county.put("COUNTYFIPS", COUNTYFIPS);
 						county.put("POPULATION", county.getInt("POPULATION")	+POPULATION);
 						county.put("TTL_STAFF", county.getInt("TTL_STAFF") +TTL_STAFF);
@@ -195,9 +190,9 @@ public class HIFLDOpenDataParser implements ModelParser {
 						
 					} else { // Initialize CountyObject for aggregation
 						county = new JSONObject();
-						county.put("COUNTRY", property.getString("COUNTRY"));
-						county.put("STATE", property.getString("STATE"));
-						county.put("COUNTY", property.getString("COUNTY"));
+						county.put("COUNTRY", properties.getString("COUNTRY"));
+						county.put("STATE", properties.getString("STATE"));
+						county.put("COUNTY", properties.getString("COUNTY"));
 						county.put("COUNTYFIPS",COUNTYFIPS);
 						county.put("POPULATION", POPULATION);
 						county.put("TTL_STAFF", TTL_STAFF);
@@ -287,11 +282,16 @@ public class HIFLDOpenDataParser implements ModelParser {
 	/**
 	 * Converts JSON object to XML returns XML string.
 	 */
-	private String convertJSONToXMLReport(String jsonObject, String root)
-			throws JSONException {
-		String xml = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<"
-				+ root + ">" + XML.toString(jsonObject) + "</" + root + ">";
-
+	private String convertJSONToXMLReport(JSONObject jsonObject, String root) throws JSONException {
+		
+		String xml = "";
+		try {
+				xml = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<"
+					+ root + ">" +org.json.XML.toString( jsonObject) + "</" + root + ">";
+			
+		} catch (JSONException je) {
+			je.printStackTrace();
+		} 
 		return xml;
 	}
 }
