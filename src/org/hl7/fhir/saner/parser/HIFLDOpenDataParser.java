@@ -9,6 +9,7 @@ import org.json.JSONTokener;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -114,19 +115,11 @@ public class HIFLDOpenDataParser implements ModelParser {
 					}
 				}
 			}
-			
-			//Validate code:
-			  System.out.println("Aggregated critical-resources county-wise:" ); 
-				for (String key : aggregateCountyWise.keySet()) {
-					System.out.println(aggregateCountyWise.get(key).getString("COUNTRY")+ ", "
-							+ aggregateCountyWise.get(key).getString("STATE")+ ", "
-							+ aggregateCountyWise.get(key).getString("COUNTY")+ ": "
-							+ "Population="+ aggregateCountyWise.get(key).getInt("POPULATION")+ ", "
-							+ "TTL_Staff="+ aggregateCountyWise.get(key).getInt("TTL_STAFF")+ ", "
-							+ "Beds="+ aggregateCountyWise.get(key).getInt("BEDS"));
-				}
-				// Clear hashMap in the end.
-			  aggregateCountyWise.clear();	
+			System.out.println("Done aggregating critical-resources county-wise.");
+			//Validate results in .csv file:
+			writeToCSV(aggregateCountyWise);	
+			// Clear hashMap in the end.
+			 aggregateCountyWise.clear();	
 
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -181,17 +174,9 @@ public class HIFLDOpenDataParser implements ModelParser {
 				}
 			}
 			
-			//Validate results:
-		    System.out.println("Aggregated critical-resources county-wise:" ); 
-			for (String key : aggregateCountyWise.keySet()) {
-				System.out.println(aggregateCountyWise.get(key).getString("COUNTRY")+ ", "
-						+ aggregateCountyWise.get(key).getString("STATE")+ ", "
-						+ aggregateCountyWise.get(key).getString("COUNTY")+ ": "
-						+ "Population="+ aggregateCountyWise.get(key).getInt("POPULATION")+ ", "
-						+ "TTL_Staff="+ aggregateCountyWise.get(key).getInt("TTL_STAFF")+ ", "
-						+ "Beds="+ aggregateCountyWise.get(key).getInt("BEDS"));
-			}
-			
+			System.out.println("Done aggregating critical-resources county-wise.");
+			//Validate results in .csv file:
+			writeToCSV(aggregateCountyWise);
 			// Clear hashMap in the end.
 			aggregateCountyWise.clear();	
 			
@@ -255,6 +240,45 @@ public class HIFLDOpenDataParser implements ModelParser {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Converts JSON object to CSV.
+	 */
+	private void  writeToCSV(HashMap<String, JSONObject> jsoCounty) {
+		
+		String rCSVFile = "HIFLD_json-" +System.currentTimeMillis() +".csv";
+		
+		try (FileWriter csvWriter = new FileWriter(rCSVFile)){
+				csvWriter.append("Country");
+				csvWriter.append(",");
+				csvWriter.append("State");
+				csvWriter.append(",");
+				csvWriter.append("County");
+				csvWriter.append(",");
+				csvWriter.append("Population");
+				csvWriter.append(",");
+				csvWriter.append("Total-Staff");
+				csvWriter.append(",");
+				csvWriter.append("Bed");
+				csvWriter.append("\n");
+				
+				for (String key : jsoCounty.keySet()) {
+					csvWriter.append(jsoCounty.get(key).getString("COUNTRY") +",");
+					csvWriter.append(jsoCounty.get(key).getString("STATE")+",");
+					csvWriter.append(jsoCounty.get(key).getString("COUNTY")+",");
+					csvWriter.append(String.valueOf( jsoCounty.get(key).getInt("POPULATION"))+",");
+					csvWriter.append(String.valueOf( jsoCounty.get(key).getInt("TTL_STAFF"))+",");
+					csvWriter.append(String.valueOf( jsoCounty.get(key).getInt("BEDS")));
+				    csvWriter.append("\n");
+				}
+				csvWriter.flush();
+				csvWriter.close();
+			    System.out.println("Results available in the file: " +rCSVFile); 
+			    
+		} catch (IOException io) {
+			io.printStackTrace();
+		} 
 	}
 
 	/**
