@@ -43,26 +43,26 @@ public class HIFLDOpenDataParser implements ModelParser {
 	 * 
 	 * @return prints-out attributes of source-file
 	 */
-	public void parseData() {
-
+	public String parseData() {
+		String pMsg = "";
 		switch (this.model.Context().Type()) {
 		case JSON:
-			parseJSONFile(this.model.Context().Source());
+			pMsg = parseJSONFile(this.model.Context().Source());
 			break;
 
 		case REST:
-			queryAndParseRESTUrl(this.model.Context().Source());
+			pMsg =  queryAndParseRESTUrl(this.model.Context().Source());
 			break;
 
 		// TODO query and parse xml data from HIFLD url.
 		case XML:
-			parseXML(this.model.Context().Source());
+			pMsg =  parseXML(this.model.Context().Source());
 			break;
 			
 		default:
 			break;
 		}
-		// Test message;
+		return pMsg; 
 	}
 
 	/**
@@ -70,16 +70,16 @@ public class HIFLDOpenDataParser implements ModelParser {
 	 * 
 	 * @param path to JSON file
 	 */
-	private void parseJSONFile(String jsonFilePath) {
-
+	private String parseJSONFile(String jsonFilePath) {
+		
+		String msg = "";
+ 
 		try (FileReader reader = new FileReader(jsonFilePath)) {
 
-			JSONTokener tokener = new JSONTokener(reader);
-			
+			JSONTokener tokener = new JSONTokener(reader);			
 			JSONObject jso = new JSONObject(tokener);
 			reader.close();
 			
-			System.out.println("Processing HIFLD hospitals-records.....");
 			JSONArray attributes = jso.getJSONArray("features");
 
 			HashMap<String, JSONObject> aggregateCountyWise = new HashMap<String, JSONObject>();
@@ -115,19 +115,20 @@ public class HIFLDOpenDataParser implements ModelParser {
 					}
 				}
 			}
-			System.out.println("Done aggregating critical-resources county-wise.");
 			//Validate results in .csv file:
 			writeToCSV(aggregateCountyWise);	
 			// Clear hashMap in the end.
 			 aggregateCountyWise.clear();	
-
+			 msg = "Done aggregating critical-resources county-wise.";
+			 
 		} catch (JSONException e) {
-			e.printStackTrace();
+			msg = e.getMessage();
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			msg = e.getMessage();
 		} catch (IOException e) {
-			e.printStackTrace();
-		}		
+			msg = e.getMessage();
+		}
+		 return msg;
 	}
 	
 	/**
@@ -135,11 +136,12 @@ public class HIFLDOpenDataParser implements ModelParser {
 	 * 
 	 * @param JSON object containing records.
 	 */
-	private void parseUrlCountyWise(JSONObject jso) {
-				
-		try  {	
+	private String  parseUrlCountyWise(JSONObject jso) {
+		String msg = "";
+		
+		try  {			
 			JSONArray features = jso.getJSONArray("features");
-			if (features == null || features.length() ==0) return;
+			if (features == null || features.length() ==0) return msg;
 			
 			HashMap<String, JSONObject> aggregateCountyWise = new HashMap<String, JSONObject>();
 			JSONObject property, county = null;
@@ -174,15 +176,17 @@ public class HIFLDOpenDataParser implements ModelParser {
 				}
 			}
 			
-			System.out.println("Done aggregating critical-resources county-wise.");
 			//Validate results in .csv file:
-			writeToCSV(aggregateCountyWise);
+			msg = writeToCSV(aggregateCountyWise);
 			// Clear hashMap in the end.
 			aggregateCountyWise.clear();	
+		
+			msg+= "\n\rFinished aggregating critical-resources county-wise.";
 			
 		} catch (JSONException e) {
-			e.printStackTrace();
+			msg = e.getMessage();
 		}
+		return msg;
 	}
 
 	/**
@@ -190,11 +194,11 @@ public class HIFLDOpenDataParser implements ModelParser {
 	 * 
 	 * @param the URL of RESTful query to GET data.
 	 */
-	public void queryAndParseRESTUrl(String urlPath) {
+	public String queryAndParseRESTUrl(String urlPath) {
+		String msg = "";
+		
 		try {
 			URL url = new URL(urlPath);
-			
-			System.out.println("Connecting HIFLD url to get hospitals-records......");
 			// Compute time taken to get/parse output from RESTUrl.
 			long startTime = System.currentTimeMillis();
 			
@@ -216,38 +220,43 @@ public class HIFLDOpenDataParser implements ModelParser {
 
 			// Process and aggregate critical-resources in hospitals-records county-wise.
 			parseUrlCountyWise(hospitalRecords);
-
-			System.out.println("Took " + (System.currentTimeMillis() - startTime)+ " milliseconds to get and parse records.");
+			
+			msg = "Took " + (System.currentTimeMillis() - startTime)+ " milliseconds to get and parse records.";
 
 		} catch (MalformedURLException e) {
-			e.printStackTrace();
+			msg = e.getMessage();
 		} catch (IOException io) {
-			io.printStackTrace();
+			msg = io.getMessage();
 		}
+		return msg;
 	}
 
 	/**
 	 * Parses XML Prints out all hospitals' attributes within XMLObject.
 	 */
-	private void parseXML(String xmlFilePath) {
-
+	private String parseXML(String xmlFilePath) {
+		String msg = "";
+		
 		try (FileReader reader = new FileReader(xmlFilePath)) {
 			// TODO Read and parse XML
 		} catch (FileNotFoundException e) {
+			msg = e.getMessage();
+
 			e.printStackTrace();
 		} catch (IOException e) {
-			e.printStackTrace();
+			msg = e.getMessage();
 		} catch (Exception e) {
-			e.printStackTrace();
+			msg = e.getMessage();
 		}
+		return msg;
 	}
 	
 	/**
 	 * Converts JSON object to CSV.
 	 */
-	private void  writeToCSV(HashMap<String, JSONObject> jsoCounty) {
-		
-		String rCSVFile = "HIFLD_json-" +System.currentTimeMillis() +".csv";
+	private String writeToCSV(HashMap<String, JSONObject> jsoCounty) {		
+		String msg = "";
+		String rCSVFile= "HIFLD_json-"+System.currentTimeMillis() +".csv ";
 		
 		try (FileWriter csvWriter = new FileWriter(rCSVFile)){
 				csvWriter.append("Country");
@@ -274,11 +283,12 @@ public class HIFLDOpenDataParser implements ModelParser {
 				}
 				csvWriter.flush();
 				csvWriter.close();
-			    System.out.println("Results available in the file: " +rCSVFile); 
-			    
+				msg = "Results available in:" +rCSVFile;
+				
 		} catch (IOException io) {
-			io.printStackTrace();
-		} 
+			msg = io.getMessage();
+		}
+		return msg;
 	}
 
 	/**

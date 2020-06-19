@@ -11,10 +11,10 @@ public class Context {
 	
 	public enum Type {
 	    JSON,
-	    XML,
-	    CSV,
 	    REST,
-	    SQL
+	    FHIR,
+	    XML,
+	    CSV
 	}
 	
 	/**
