@@ -70,8 +70,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 	 * 
 	 * @param path to JSON file
 	 */
-	private String parseJSONFile(String jsonFilePath) {
-		
+	private String parseJSONFile(String jsonFilePath) {		
 		String msg = "";
  
 		try (FileReader reader = new FileReader(jsonFilePath)) {
@@ -115,12 +114,11 @@ public class HIFLDOpenDataParser implements ModelParser {
 					}
 				}
 			}
+			msg +="Completed aggregating critical-resources county-wise.\n\r";
 			//Validate results in .csv file:
-			writeToCSV(aggregateCountyWise);	
+			msg += writeToCSV(aggregateCountyWise);	
 			// Clear hashMap in the end.
-			 aggregateCountyWise.clear();	
-			 msg = "Done aggregating critical-resources county-wise.";
-			 
+			aggregateCountyWise.clear();				 
 		} catch (JSONException e) {
 			msg = e.getMessage();
 		} catch (FileNotFoundException e) {
@@ -136,7 +134,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 	 * 
 	 * @param JSON object containing records.
 	 */
-	private String  parseUrlCountyWise(JSONObject jso) {
+	private String parseUrlCountyWise(JSONObject jso) {
 		String msg = "";
 		
 		try  {			
@@ -175,13 +173,11 @@ public class HIFLDOpenDataParser implements ModelParser {
 					}
 				}
 			}
-			
+			msg= "Completed aggregating critical-resources county-wise.\n\r";
 			//Validate results in .csv file:
-			msg = writeToCSV(aggregateCountyWise);
+			msg += writeToCSV(aggregateCountyWise);
 			// Clear hashMap in the end.
-			aggregateCountyWise.clear();	
-		
-			msg+= "\n\rFinished aggregating critical-resources county-wise.";
+			aggregateCountyWise.clear();
 			
 		} catch (JSONException e) {
 			msg = e.getMessage();
@@ -219,9 +215,8 @@ public class HIFLDOpenDataParser implements ModelParser {
 			reader.close();
 
 			// Process and aggregate critical-resources in hospitals-records county-wise.
-			parseUrlCountyWise(hospitalRecords);
-			
-			msg = "Took " + (System.currentTimeMillis() - startTime)+ " milliseconds to get and parse records.";
+			msg= parseUrlCountyWise(hospitalRecords);			
+			msg += "\n\rTook " + (System.currentTimeMillis() - startTime)+ " milliseconds to get and parse records.";
 
 		} catch (MalformedURLException e) {
 			msg = e.getMessage();
@@ -256,7 +251,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 	 */
 	private String writeToCSV(HashMap<String, JSONObject> jsoCounty) {		
 		String msg = "";
-		String rCSVFile= "HIFLD_json-"+System.currentTimeMillis() +".csv ";
+		String rCSVFile= "Hifld_CountyWise-"+System.currentTimeMillis() +".csv ";
 		
 		try (FileWriter csvWriter = new FileWriter(rCSVFile)){
 				csvWriter.append("Country");
@@ -283,7 +278,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 				}
 				csvWriter.flush();
 				csvWriter.close();
-				msg = "Results available in:" +rCSVFile;
+				msg = "Results in: " +rCSVFile;
 				
 		} catch (IOException io) {
 			msg = io.getMessage();
