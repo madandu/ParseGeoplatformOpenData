@@ -120,11 +120,11 @@ public class HIFLDOpenDataParser implements ModelParser {
 			// Clear hashMap in the end.
 			aggregateCountyWise.clear();				 
 		} catch (JSONException e) {
-			msg = e.getMessage();
+			msg = "Parser error: " +e.getMessage();
 		} catch (FileNotFoundException e) {
-			msg = e.getMessage();
+			msg = "Parser error: " +e.getMessage();
 		} catch (IOException e) {
-			msg = e.getMessage();
+			msg = "Parser error: " +e.getMessage();
 		}
 		 return msg;
 	}
@@ -179,10 +179,12 @@ public class HIFLDOpenDataParser implements ModelParser {
 			// Clear hashMap in the end.
 			aggregateCountyWise.clear();
 			
-		} catch (JSONException e) {
-			msg = e.getMessage();
+		} catch (JSONException je) {
+			msg = "Parser error: " + je.getMessage();
+		} catch (Exception e) {
+			msg = "Parser error: " +e.getMessage();
 		}
-		return msg;
+			return msg;			
 	}
 
 	/**
@@ -218,12 +220,15 @@ public class HIFLDOpenDataParser implements ModelParser {
 			msg= parseUrlCountyWise(hospitalRecords);			
 			msg += "\n\rTook " + (System.currentTimeMillis() - startTime)+ " milliseconds to get and parse records.";
 
-		} catch (MalformedURLException e) {
-			msg = e.getMessage();
+		} catch (MalformedURLException me) {
+			msg = "Parser error: " +me.getMessage();
 		} catch (IOException io) {
-			msg = io.getMessage();
+			msg = "Parser error: "+io.getMessage();
+		} catch (Exception e) {
+			msg = "Parser error: "+e.getMessage();
 		}
-		return msg;
+
+		return msg;	
 	}
 
 	/**
@@ -238,10 +243,10 @@ public class HIFLDOpenDataParser implements ModelParser {
 			msg = e.getMessage();
 
 			e.printStackTrace();
-		} catch (IOException e) {
-			msg = e.getMessage();
+		} catch (IOException io) {
+			msg = "Parser error: " +io.getMessage();
 		} catch (Exception e) {
-			msg = e.getMessage();
+			msg = "Parser error: " +e.getMessage();
 		}
 		return msg;
 	}
@@ -281,7 +286,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 				msg = "Results in: " +rCSVFile;
 				
 		} catch (IOException io) {
-			msg = io.getMessage();
+			msg = "Parser error: " +io.getMessage();
 		}
 		return msg;
 	}

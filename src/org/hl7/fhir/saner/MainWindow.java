@@ -1,14 +1,18 @@
 package org.hl7.fhir.saner;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.FlowLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.SystemColor;
 import javax.swing.border.LineBorder;
+import javax.swing.AbstractButton;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -56,6 +60,8 @@ public class MainWindow extends JFrame implements ActionListener  {
 			public void run() {
 				try {
 					win = new MainWindow();
+					win.setAlwaysOnTop(true);
+					win.setLocationByPlatform(true);
 					win.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -97,7 +103,8 @@ public class MainWindow extends JFrame implements ActionListener  {
     	        else if (obj instanceof JMenuItem)
     				System.exit(0);  //Exit window
 		} finally {			
-			win.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));			}    	
+			win.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));			
+			}    	
 	}
    
 	/**
@@ -106,7 +113,6 @@ public class MainWindow extends JFrame implements ActionListener  {
 	private void initialize() {
 		
 		this.setTitle("Application to get and parse hospital-records");
-		this.setMaximumSize(new Dimension(800, 320));
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLayout(new FlowLayout());  
@@ -116,15 +122,11 @@ public class MainWindow extends JFrame implements ActionListener  {
 	
 		btnProc = new JButton("Process-data");
 		btnProc.setBackground(SystemColor.inactiveCaption);
-		btnProc.setBounds(10, 20, 25, 40);
 		btnProc.addActionListener(this);
-
+		btnProc.setVerticalAlignment(SwingConstants.BOTTOM);
 		this.getContentPane().add(btnProc);
 		// win.getContentPane().add(BorderLayout.SOUTH, jtaStatus);
-		showWelcome();
-		
-		this.setSize(800, 240);
-		this.setLocationRelativeTo(null);
+		showWelcome();	
 		this.pack();
 	}
 	
@@ -152,7 +154,6 @@ public class MainWindow extends JFrame implements ActionListener  {
 	{
 		JPanel pnlType = new JPanel();
 		pnlType.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
-		pnlType.setBounds(15, 25, 100, 50);
 		
 		final String[] aTypes = {"JSON", "REST"}; //, "FHIR"
 		final DefaultComboBoxModel<String> tModel = new DefaultComboBoxModel<>(aTypes);
@@ -160,7 +161,6 @@ public class MainWindow extends JFrame implements ActionListener  {
 		lstType = new JComboBox<String>();
 		lstSource = new JComboBox<String>();
 		lstType.setModel(tModel);
-		lstType.setSize(10, 20);
 		
 		String JSON[]= {"C:\\Users\\madan\\git\\ParseGeoplatformOpenData\\data\\hifld-geoplatform.opendata.arcgis.com.api.json"};
 		/*String FHIR[] = { "http://nprogram.azurewebsites.net/Patient/1/?_format=json",
@@ -176,13 +176,16 @@ public class MainWindow extends JFrame implements ActionListener  {
 		JLabel lblType = new JLabel("Data-type:");
 		pnlType.add(lblType);
 		pnlType.add(lstType);
+		pnlType.setAlignmentX(LEFT_ALIGNMENT);
+		pnlType.setAlignmentY(TOP_ALIGNMENT);
 
 		JPanel pnlSource = new JPanel();
 		pnlSource.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
-		pnlSource.setBounds(15, 25, 300, 200);
 		JLabel lblDS = new JLabel("Data-source:");
 		pnlSource.add(lblDS);
 		pnlSource.add(lstSource);
+		pnlSource.setAlignmentX(LEFT_ALIGNMENT);
+		pnlSource.setAlignmentY(TOP_ALIGNMENT);
 
 		this.getContentPane().add(pnlType);
 		this.getContentPane().add(pnlSource);
@@ -199,6 +202,7 @@ public class MainWindow extends JFrame implements ActionListener  {
 		/**
 		 * Load and parse HIFLD open-data of USA based hospitals
 		 */
+		 @Override
 		protected String doInBackground() {
 			String result = "";
 					try {
@@ -211,15 +215,5 @@ public class MainWindow extends JFrame implements ActionListener  {
 					}
 					return result;
 		} 
-
-		protected void done() {
-		    try  
-		    {  
-		    	String result = this.get();
-		    }
-		    catch (Exception ignore)  
-		    { 
-		    }
-		}
 	}
 }
