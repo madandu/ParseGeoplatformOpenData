@@ -1,11 +1,11 @@
 package org.hl7.fhir.saner;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowListener;
 import java.awt.FlowLayout;
 import java.awt.SystemColor;
 import javax.swing.border.LineBorder;
@@ -20,12 +20,12 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 
 import org.hl7.fhir.saner.data.Context;
-import org.hl7.fhir.saner.data.Context.Type;
 import org.hl7.fhir.saner.data.Model;
+import org.hl7.fhir.saner.parser.HIFLDOpenDataParser;
 
 /**
  * @author Madan Upadhyay
@@ -36,8 +36,9 @@ public class MainWindow extends JFrame implements ActionListener  {
 	private static JComboBox<String> lstType;
 	private static JComboBox<String> lstSource;
 	private static JButton btnProc;;
-	private static JFrame win;
 	private static	String[][] aSources;
+
+	private static JFrame win;
 
 	/**
 	 * Create the application.
@@ -64,44 +65,39 @@ public class MainWindow extends JFrame implements ActionListener  {
 	}
 	
     public void actionPerformed(ActionEvent e) {
-      
-    	Object obj = e.getSource();
-	    
-        // JButton clicked
-        if (obj instanceof JButton) {
-            // Process button clicked.
-            Context ctx = null;
-			final String sSource = lstSource.getSelectedItem().toString();
-			
-			switch (lstType.getSelectedItem().toString()) {
-			case "JSON":
-				// Open and parse json file @ sourcePath on local file-system
-				ctx = new Context(sSource, Context.Type.JSON);
-				break;					
-				// Get  and parse data from the REST url
-			case "REST":
-				ctx = new Context(sSource, Context.Type.REST);
-				break;
-			case "FHIR":
-				// Get  and parse data from the FHIR server.
-				ctx = new Context(sSource, Context.Type.FHIR);
-				break;
-			default:
-				// Default
-				ctx = new Context(sSource, Context.Type.JSON);
-			}
-			new ParserWorker(new Model(ctx)).execute();
-		}
-        else if (obj instanceof JMenuItem)
-        {
-        	//Exit window
-			System.exit(0);
-        }
-        // List selected.
-        else if (obj instanceof JComboBox)
-        {
-        	lstSource.setModel(new DefaultComboBoxModel<>(aSources[lstType.getSelectedIndex()]));
-        }
+    	
+    	Object obj = null;
+    	try {
+    		 obj = e.getSource();
+    	        if (obj instanceof JButton) {     	// Handle Process-data button click
+    	            Context ctx = null;
+    				final String sSource = lstSource.getSelectedItem().toString();    				
+    				switch (lstType.getSelectedItem().toString()) {
+    				case "JSON":
+    					// Open and parse json file @ sourcePath on local file-system
+    					ctx = new Context(sSource, Context.Type.JSON);
+    					break;					
+    					// Get  and parse data from the REST url
+    				case "REST":
+    					ctx = new Context(sSource, Context.Type.REST);
+    					break;
+    				case "FHIR":
+    					// Get  and parse data from the FHIR server.
+    					ctx = new Context(sSource, Context.Type.FHIR);
+    					break;
+    				default:
+    					// Default
+    					ctx = new Context(sSource, Context.Type.JSON);
+    				}
+    				// Start parsing...
+    				 new ParserWorker(new Model(ctx)).run();
+    			}
+    	        else if (obj instanceof JComboBox)    // Data-type selected.
+    	        	lstSource.setModel(new DefaultComboBoxModel<>(aSources[lstType.getSelectedIndex()]));
+    	        else if (obj instanceof JMenuItem)
+    				System.exit(0);  //Exit window
+		} finally {			
+			win.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));			}    	
 	}
    
 	/**
@@ -158,7 +154,7 @@ public class MainWindow extends JFrame implements ActionListener  {
 		pnlType.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
 		pnlType.setBounds(15, 25, 100, 50);
 		
-		final String[] aTypes = {"JSON", "REST", "FHIR"};
+		final String[] aTypes = {"JSON", "REST"}; //, "FHIR"
 		final DefaultComboBoxModel<String> tModel = new DefaultComboBoxModel<>(aTypes);
 		
 		lstType = new JComboBox<String>();
@@ -167,11 +163,11 @@ public class MainWindow extends JFrame implements ActionListener  {
 		lstType.setSize(10, 20);
 		
 		String JSON[]= {"C:\\Users\\madan\\git\\ParseGeoplatformOpenData\\data\\hifld-geoplatform.opendata.arcgis.com.api.json"};
-		String FHIR[] = { "http://nprogram.azurewebsites.net/Patient/1/?_format=json",
+		/*String FHIR[] = { "http://nprogram.azurewebsites.net/Patient/1/?_format=json",
 				"http://nprogram.azurewebsites.net/DiagnosticReport/1?_format=json",
-				"http://fhir-dstu2-nprogram.azurewebsites.net/DiagnosticReport/10" };
+		*/
 		String REST[] = {"https://opendata.arcgis.com/datasets/6ac5e325468c4cb9b905f1728d6fbf0f_0.geojson"};
-		aSources = new String[][]{JSON,REST,FHIR};
+		aSources = new String[][]{JSON, REST}; //, FHIR
 		
 		lstType.addActionListener(this);		
 		final DefaultComboBoxModel<String> sModel = new DefaultComboBoxModel<>(aSources[0]);
@@ -190,5 +186,40 @@ public class MainWindow extends JFrame implements ActionListener  {
 
 		this.getContentPane().add(pnlType);
 		this.getContentPane().add(pnlSource);
+	}
+
+	public class ParserWorker extends SwingWorker<String, Integer> {
+		
+		private Model model; 
+		
+		public ParserWorker(Model data){
+		this.model = data;
+		}
+		
+		/**
+		 * Load and parse HIFLD open-data of USA based hospitals
+		 */
+		protected String doInBackground() {
+			String result = "";
+					try {
+						final HIFLDOpenDataParser hldParser = new HIFLDOpenDataParser(this.model);
+						MainWindow.win.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+						result = hldParser.parseData();
+					} finally {
+						MainWindow.win.setCursor(Cursor.getDefaultCursor());
+						JOptionPane.showMessageDialog(MainWindow.win, result);
+					}
+					return result;
+		} 
+
+		protected void done() {
+		    try  
+		    {  
+		    	String result = this.get();
+		    }
+		    catch (Exception ignore)  
+		    { 
+		    }
+		}
 	}
 }
