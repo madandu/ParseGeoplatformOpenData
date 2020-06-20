@@ -1,24 +1,18 @@
 package org.hl7.fhir.saner;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.FlowLayout;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.SystemColor;
 import javax.swing.border.LineBorder;
-import javax.swing.AbstractButton;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -121,9 +115,8 @@ public class MainWindow extends JFrame implements ActionListener  {
 		initializeLists();
 	
 		btnProc = new JButton("Process-data");
-		btnProc.setBackground(SystemColor.inactiveCaption);
+		btnProc.setBackground(SystemColor.activeCaption);
 		btnProc.addActionListener(this);
-		btnProc.setVerticalAlignment(SwingConstants.BOTTOM);
 		this.getContentPane().add(btnProc);
 		// win.getContentPane().add(BorderLayout.SOUTH, jtaStatus);
 		showWelcome();	
@@ -143,7 +136,6 @@ public class MainWindow extends JFrame implements ActionListener  {
 		JMenuBar jmbMain = new JMenuBar();
 		JMenu jmnOptions = new JMenu("Options");
 		JMenuItem jmiExit = new JMenuItem("Exit");
-		jmiExit.setHorizontalAlignment(SwingConstants.LEADING);
 		jmnOptions.add(jmiExit);
 		jmbMain.add(jmnOptions);
 		jmiExit.addActionListener(this);
@@ -176,16 +168,13 @@ public class MainWindow extends JFrame implements ActionListener  {
 		JLabel lblType = new JLabel("Data-type:");
 		pnlType.add(lblType);
 		pnlType.add(lstType);
-		pnlType.setAlignmentX(LEFT_ALIGNMENT);
-		pnlType.setAlignmentY(TOP_ALIGNMENT);
+
 
 		JPanel pnlSource = new JPanel();
 		pnlSource.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
 		JLabel lblDS = new JLabel("Data-source:");
 		pnlSource.add(lblDS);
 		pnlSource.add(lstSource);
-		pnlSource.setAlignmentX(LEFT_ALIGNMENT);
-		pnlSource.setAlignmentY(TOP_ALIGNMENT);
 
 		this.getContentPane().add(pnlType);
 		this.getContentPane().add(pnlSource);
