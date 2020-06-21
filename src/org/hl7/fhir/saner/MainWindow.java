@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.FlowLayout;
 import java.awt.SystemColor;
+import java.io.File;
 import javax.swing.border.LineBorder;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -18,7 +19,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 
 import org.hl7.fhir.saner.data.Context;
@@ -31,6 +31,11 @@ import org.hl7.fhir.saner.parser.HIFLDOpenDataParser;
  */
 public class MainWindow extends JFrame implements ActionListener  {
 
+	/**
+	 * Default version-ID
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private static JComboBox<String> lstType;
 	private static JComboBox<String> lstSource;
 	private static JButton btnProc;;
@@ -48,8 +53,7 @@ public class MainWindow extends JFrame implements ActionListener  {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
-		
+	public static void main(String[] args) {	
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -65,7 +69,6 @@ public class MainWindow extends JFrame implements ActionListener  {
 	}
 	
     public void actionPerformed(ActionEvent e) {
-    	
     	Object obj = null;
     	try {
     		 obj = e.getSource();
@@ -105,7 +108,6 @@ public class MainWindow extends JFrame implements ActionListener  {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		
 		this.setTitle("Application to get and parse hospital-records");
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -123,16 +125,14 @@ public class MainWindow extends JFrame implements ActionListener  {
 		this.pack();
 	}
 	
-	private void showWelcome()
-	{
+	private void showWelcome() {
 		JOptionPane.showMessageDialog(win,
 				"Welcome to the Saner data-parser app." 
 				+"\n\rPlease select data-type and data-source to find"
 				+"\n\rcritical-resources in hospitals-records of Hifld-opendata.");
 	}
 	
-	private void initializeMenus()
-	{
+	private void initializeMenus() {
 		JMenuBar jmbMain = new JMenuBar();
 		JMenu jmnOptions = new JMenu("Options");
 		JMenuItem jmiExit = new JMenuItem("Exit");
@@ -142,8 +142,7 @@ public class MainWindow extends JFrame implements ActionListener  {
 		this.setJMenuBar(jmbMain);
 	}
 	
-	private void initializeLists()
-	{
+	private void initializeLists() {
 		JPanel pnlType = new JPanel();
 		pnlType.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
 		
@@ -154,7 +153,7 @@ public class MainWindow extends JFrame implements ActionListener  {
 		lstSource = new JComboBox<String>();
 		lstType.setModel(tModel);
 		
-		String JSON[]= {"C:\\Users\\madan\\git\\ParseGeoplatformOpenData\\data\\hifld-geoplatform.opendata.arcgis.com.api.json"};
+		String JSON[]= this.getDataList();
 		/*String FHIR[] = { "http://nprogram.azurewebsites.net/Patient/1/?_format=json",
 				"http://nprogram.azurewebsites.net/DiagnosticReport/1?_format=json",
 		*/
@@ -179,9 +178,29 @@ public class MainWindow extends JFrame implements ActionListener  {
 		this.getContentPane().add(pnlType);
 		this.getContentPane().add(pnlSource);
 	}
-
+	
+	private String[] getDataList() {
+		String[] rlist = null;
+		String dataPath = System.getProperty("user.dir") + File.separator+"data";
+		try {
+			 	File f = new File(dataPath);
+			 	String[] list = f.list((d, s) -> {
+			 		return s.toLowerCase().endsWith(".json");
+			 		});	
+			 		
+			 		rlist = new String[list.length];
+			 		for (int i = 0; i < list.length; i++) {
+			 			rlist[i] = dataPath  + File.separator+ list[i];
+			 		}
+		} catch(NullPointerException e) {
+			e.printStackTrace();
+		}
+			return rlist;
+	}
+	
+	/* A worker class to do data-parsing as background job.
+	 * */		
 	public class ParserWorker extends SwingWorker<String, Integer> {
-		
 		private Model model; 
 		
 		public ParserWorker(Model data){
@@ -189,7 +208,7 @@ public class MainWindow extends JFrame implements ActionListener  {
 		}
 		
 		/**
-		 * Load and parse HIFLD open-data of USA based hospitals
+		 * Load and parse HIFLD open-data of USA based hospitals in background.
 		 */
 		 @Override
 		protected String doInBackground() {
