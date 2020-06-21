@@ -8,6 +8,9 @@ import java.awt.event.ActionListener;
 import java.awt.FlowLayout;
 import java.awt.SystemColor;
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.swing.border.LineBorder;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -68,42 +71,6 @@ public class MainWindow extends JFrame implements ActionListener  {
 		});
 	}
 	
-    public void actionPerformed(ActionEvent e) {
-    	Object obj = null;
-    	try {
-    		 obj = e.getSource();
-    	        if (obj instanceof JButton) {     	// Handle Process-data button click
-    	            Context ctx = null;
-    				final String sSource = lstSource.getSelectedItem().toString();    				
-    				switch (lstType.getSelectedItem().toString()) {
-    				case "JSON":
-    					// Open and parse json file @ sourcePath on local file-system
-    					ctx = new Context(sSource, Context.Type.JSON);
-    					break;					
-    					// Get  and parse data from the REST url
-    				case "REST":
-    					ctx = new Context(sSource, Context.Type.REST);
-    					break;
-    				case "FHIR":
-    					// Get  and parse data from the FHIR server.
-    					ctx = new Context(sSource, Context.Type.FHIR);
-    					break;
-    				default:
-    					// Default
-    					ctx = new Context(sSource, Context.Type.JSON);
-    				}
-    				// Start parsing...
-    				 new ParserWorker(new Model(ctx)).run();
-    			}
-    	        else if (obj instanceof JComboBox)    // Data-type selected.
-    	        	lstSource.setModel(new DefaultComboBoxModel<>(aSources[lstType.getSelectedIndex()]));
-    	        else if (obj instanceof JMenuItem)
-    				System.exit(0);  //Exit window
-		} finally {			
-			win.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));			
-			}    	
-	}
-   
 	/**
 	 * Initialize the contents of the frame.
 	 */
@@ -145,8 +112,9 @@ public class MainWindow extends JFrame implements ActionListener  {
 	private void initializeLists() {
 		JPanel pnlType = new JPanel();
 		pnlType.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
-		
-		final String[] aTypes = {"JSON", "REST"}; //, "FHIR"
+
+		List<Context.Type> types = Arrays.asList(Context.Type.values());			
+		final String[] aTypes = {types.get(0).name(),  types.get(1).name()}; //, "FHIR"
 		final DefaultComboBoxModel<String> tModel = new DefaultComboBoxModel<>(aTypes);
 		
 		lstType = new JComboBox<String>();
@@ -167,7 +135,6 @@ public class MainWindow extends JFrame implements ActionListener  {
 		JLabel lblType = new JLabel("Data-type:");
 		pnlType.add(lblType);
 		pnlType.add(lstType);
-
 
 		JPanel pnlSource = new JPanel();
 		pnlSource.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
@@ -197,6 +164,31 @@ public class MainWindow extends JFrame implements ActionListener  {
 		}
 			return rlist;
 	}
+	
+	  public void actionPerformed(ActionEvent e) {
+	    	Object obj = null;
+			MainWindow.win.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+	    	
+			try {
+	    		 obj = e.getSource();
+	  
+	    		 if (obj instanceof JButton) {   // Handle Process-button click
+	    				Context.Type dType = Context.Type.valueOf(lstType.getSelectedItem().toString());
+	    				String dSource = lstSource.getSelectedItem().toString();	    		
+    					final Context ctx = new Context(dSource, dType);
+	    				final Model model = new Model(ctx);
+	    				// Start parsing...
+	    				 new ParserWorker(model).run();
+	    			}
+	    	        else if (obj instanceof JComboBox)    // Handle data-type selection.
+	    	        	lstSource.setModel(new DefaultComboBoxModel<>(aSources[lstType.getSelectedIndex()]));
+	    	        else if (obj instanceof JMenuItem) // Handle 'Exit' menu-click.
+	    				System.exit(0);  //Exit window
+	    		 
+			} finally {			
+				win.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));			
+				}
+		}
 	
 	/* A worker class to do data-parsing as background job.
 	 * */		
