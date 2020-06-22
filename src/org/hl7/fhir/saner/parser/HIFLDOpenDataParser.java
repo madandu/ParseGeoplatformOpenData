@@ -114,7 +114,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 					}
 				}
 			}
-			msg +="Completed aggregating critical-resources county-wise.\n\r";
+			msg +="Completed analysis of critical hospital-resources in USA county-wise.\n\r";
 			//Validate results in .csv file:
 			msg += writeToCSV(aggregateCountyWise);	
 			// Clear hashMap in the end.
@@ -173,7 +173,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 					}
 				}
 			}
-			msg= "Completed aggregating critical-resources county-wise.\n\r";
+			msg ="Completed analysis of critical hospital-resources in USA county-wise.\n\r";
 			//Validate results in .csv file:
 			msg += writeToCSV(aggregateCountyWise);
 			// Clear hashMap in the end.
@@ -256,7 +256,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 	 */
 	private String writeToCSV(HashMap<String, JSONObject> jsoCounty) {		
 		String msg = "";
-		String rCSVFile= "Hifld_CountyWise-"+System.currentTimeMillis() +".csv ";
+		String rCSVFile= "Hifld_USA-Countywise-"+System.currentTimeMillis() +".csv ";
 		
 		try (FileWriter csvWriter = new FileWriter(rCSVFile)){
 				csvWriter.append("Country");

@@ -1,17 +1,16 @@
 package org.hl7.fhir.saner;
 
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.FlowLayout;
-import java.awt.SystemColor;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.swing.border.LineBorder;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -21,7 +20,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
 import org.hl7.fhir.saner.data.Context;
@@ -43,7 +41,7 @@ public class MainWindow extends JFrame implements ActionListener  {
 	private static JComboBox<String> lstSource;
 	private static JButton btnProc;;
 	private static	String[][] aSources;
-
+	private static	GridBagConstraints gbc;
 	private static JFrame win;
 
 	/**
@@ -60,6 +58,7 @@ public class MainWindow extends JFrame implements ActionListener  {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					gbc = new GridBagConstraints();
 					win = new MainWindow();
 					win.setAlwaysOnTop(true);
 					win.setLocationByPlatform(true);
@@ -75,21 +74,26 @@ public class MainWindow extends JFrame implements ActionListener  {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		this.setTitle("Application to get and parse hospital-records");
+		this.setTitle("Analyze data source for critical-resources in hospital.");
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setLayout(new FlowLayout());  
-
+		this.setLayout(new GridBagLayout());
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		 
 		initializeMenus();
 		initializeLists();
 	
-		btnProc = new JButton("Process-data");
-		btnProc.setBackground(SystemColor.activeCaption);
+		btnProc = new JButton("Analyze-data");
 		btnProc.addActionListener(this);
-		this.getContentPane().add(btnProc);
-		// win.getContentPane().add(BorderLayout.SOUTH, jtaStatus);
-		showWelcome();	
+		gbc.fill = GridBagConstraints.CENTER;
+		gbc.gridx = 1;
+		gbc.gridy = 2;
+		gbc.gridwidth = 2;
+		this.getContentPane().add(btnProc, gbc);
+		
 		this.pack();
+		
+		showWelcome();	
 	}
 	
 	private void showWelcome() {
@@ -109,41 +113,45 @@ public class MainWindow extends JFrame implements ActionListener  {
 		this.setJMenuBar(jmbMain);
 	}
 	
-	private void initializeLists() {
-		JPanel pnlType = new JPanel();
-		pnlType.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
-
+	private void initializeLists() {		
+		JLabel lblType = new JLabel("Data-type: ", JLabel.TRAILING);
+	    gbc.gridx = 0;
+	    gbc.gridy = 0;
+	    gbc.gridwidth = 1;
+		gbc.insets = new Insets(15, 10, 10, 0);
+		this.getContentPane().add(lblType, gbc);
+		
 		List<Context.Type> types = Arrays.asList(Context.Type.values());			
 		final String[] aTypes = {types.get(0).name(),  types.get(1).name()}; //, "FHIR"
 		final DefaultComboBoxModel<String> tModel = new DefaultComboBoxModel<>(aTypes);
-		
 		lstType = new JComboBox<String>();
-		lstSource = new JComboBox<String>();
 		lstType.setModel(tModel);
-		
-		String JSON[]= this.getDataList();
-		/*String FHIR[] = { "http://nprogram.azurewebsites.net/Patient/1/?_format=json",
-				"http://nprogram.azurewebsites.net/DiagnosticReport/1?_format=json",
-		*/
-		String REST[] = {"https://opendata.arcgis.com/datasets/6ac5e325468c4cb9b905f1728d6fbf0f_0.geojson"};
-		aSources = new String[][]{JSON, REST}; //, FHIR
-		
 		lstType.addActionListener(this);		
+	    gbc.gridx = 1;
+	    gbc.gridy = 0;
+	    gbc.gridwidth = 2;
+		gbc.insets = new Insets(15, 2, 10, 10);
+		this.getContentPane().add(lstType, gbc); 
+
+		JLabel lblSource = new JLabel("Data-source: ", JLabel.TRAILING);
+	    gbc.gridx = 0;
+	    gbc.gridy = 1;
+	    gbc.gridwidth = 1;
+		gbc.insets = new Insets(10, 10, 10, 0);
+		this.getContentPane().add(lblSource, gbc);
+	    
+		String JSON[]= this.getDataList();
+		String REST[] = {"https://opendata.arcgis.com/datasets/6ac5e325468c4cb9b905f1728d6fbf0f_0.geojson"};	
+		aSources = new String[][]{JSON, REST}; //, FHIR	
 		final DefaultComboBoxModel<String> sModel = new DefaultComboBoxModel<>(aSources[0]);
+		
+		lstSource = new JComboBox<String>();
 		lstSource.setModel(sModel);
-
-		JLabel lblType = new JLabel("Data-type:");
-		pnlType.add(lblType);
-		pnlType.add(lstType);
-
-		JPanel pnlSource = new JPanel();
-		pnlSource.setBorder(new LineBorder(Color.LIGHT_GRAY, 1, true));
-		JLabel lblDS = new JLabel("Data-source:");
-		pnlSource.add(lblDS);
-		pnlSource.add(lstSource);
-
-		this.getContentPane().add(pnlType);
-		this.getContentPane().add(pnlSource);
+		gbc.gridx = 1;
+		gbc.gridy = 1;
+		gbc.gridwidth = 2;
+		gbc.insets = new Insets(10, 2, 10, 10);
+		this.getContentPane().add(lstSource, gbc);
 	}
 	
 	private String[] getDataList() {
@@ -174,7 +182,8 @@ public class MainWindow extends JFrame implements ActionListener  {
 	  
 	    		 if (obj instanceof JButton) {   // Handle Process-button click
 	    				Context.Type dType = Context.Type.valueOf(lstType.getSelectedItem().toString());
-	    				String dSource = lstSource.getSelectedItem().toString();	    		
+	    				String dSource = lstSource.getSelectedItem().toString();
+	    		
     					final Context ctx = new Context(dSource, dType);
 	    				final Model model = new Model(ctx);
 	    				// Start parsing...
