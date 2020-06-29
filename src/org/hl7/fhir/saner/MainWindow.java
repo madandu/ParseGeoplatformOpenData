@@ -1,5 +1,6 @@
 package org.hl7.fhir.saner;
 
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -62,6 +63,7 @@ public class MainWindow extends JFrame implements ActionListener  {
 					win = new MainWindow();
 					win.setAlwaysOnTop(true);
 					win.setLocationByPlatform(true);
+					win.setLocationRelativeTo(null);
 					win.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -93,14 +95,14 @@ public class MainWindow extends JFrame implements ActionListener  {
 		
 		this.pack();
 		
-		showWelcome();	
+		showWelcome();
 	}
 	
 	private void showWelcome() {
 		JOptionPane.showMessageDialog(win,
-				"Welcome to the Saner data-parser app." 
-				+"\n\rPlease select data-type and data-source to find"
-				+"\n\rcritical-resources in hospitals-records of Hifld-opendata.");
+				"Welcome to the Saner data-analysis App." 
+				+"\n\rPlease select Hi-fld-opendata type & source"
+				+"\n to find critical-resources in USA-hospitals.");
 	}
 	
 	private void initializeMenus() {
