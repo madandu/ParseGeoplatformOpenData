@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.TrayIcon.MessageType;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +32,7 @@ import org.hl7.fhir.saner.parser.HIFLDOpenDataParser;
  * @author Madan Upadhyay
  * @email: madandu@gmail.com
  */
-public class MainWindow extends JFrame implements ActionListener  {
+public class MainWindow extends JFrame implements ActionListener {
 
 	/**
 	 * Default version-ID
@@ -55,7 +56,7 @@ public class MainWindow extends JFrame implements ActionListener  {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {	
+	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -76,7 +77,7 @@ public class MainWindow extends JFrame implements ActionListener  {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		this.setTitle("Analyze data source for critical-resources in hospital.");
+		this.setTitle("Parse and aggregate Hi-fld opendata for critical hospital-resources.");
 		this.setResizable(false);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLayout(new GridBagLayout());
@@ -99,10 +100,9 @@ public class MainWindow extends JFrame implements ActionListener  {
 	}
 	
 	private void showWelcome() {
-		JOptionPane.showMessageDialog(win,
-				"Welcome to the Saner data-analysis App." 
-				+"\n\rPlease select Hi-fld-opendata type & source"
-				+"\n to find critical-resources in USA-hospitals.");
+		JOptionPane.showConfirmDialog(win, "Please select Hi-fld-opendata type and source"
+				+"\nto aggregate critical-resources in USA-hospitals.",
+				"Welcome to the Saner data-analysis app", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	private void initializeMenus() {
