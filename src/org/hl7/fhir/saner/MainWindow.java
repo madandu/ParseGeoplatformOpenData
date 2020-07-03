@@ -1,6 +1,5 @@
 package org.hl7.fhir.saner;
 
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -8,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.TrayIcon.MessageType;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +20,9 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
+import javax.swing.WindowConstants;
 
 import org.hl7.fhir.saner.data.Context;
 import org.hl7.fhir.saner.data.Model;
@@ -41,7 +41,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	private static JComboBox<String> lstType;
 	private static JComboBox<String> lstSource;
-	private static JButton btnProc;;
+	private static JButton btnProc;
 	private static	String[][] aSources;
 	private static	GridBagConstraints gbc;
 	private static JFrame win;
@@ -58,6 +58,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				try {
 					gbc = new GridBagConstraints();
@@ -79,7 +80,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	private void initialize() {
 		this.setTitle("Parse and aggregate Hi-fld opendata for critical hospital-resources.");
 		this.setResizable(false);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		this.setLayout(new GridBagLayout());
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		 
@@ -116,7 +117,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	}
 	
 	private void initializeLists() {		
-		JLabel lblType = new JLabel("Data-type: ", JLabel.TRAILING);
+		JLabel lblType = new JLabel("Data-type: ", SwingConstants.TRAILING);
 	    gbc.gridx = 0;
 	    gbc.gridy = 0;
 	    gbc.gridwidth = 1;
@@ -135,7 +136,7 @@ public class MainWindow extends JFrame implements ActionListener {
 		gbc.insets = new Insets(15, 2, 10, 10);
 		this.getContentPane().add(lstType, gbc); 
 
-		JLabel lblSource = new JLabel("Data-source: ", JLabel.TRAILING);
+		JLabel lblSource = new JLabel("Data-source: ", SwingConstants.TRAILING);
 	    gbc.gridx = 0;
 	    gbc.gridy = 1;
 	    gbc.gridwidth = 1;
@@ -175,7 +176,8 @@ public class MainWindow extends JFrame implements ActionListener {
 			return rlist;
 	}
 	
-	  public void actionPerformed(ActionEvent e) {
+	  @Override
+	public void actionPerformed(ActionEvent e) {
 	    	Object obj = null;
 			MainWindow.win.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 	    	
@@ -191,14 +193,13 @@ public class MainWindow extends JFrame implements ActionListener {
 	    				// Start parsing...
 	    				 new ParserWorker(model).run();
 	    			}
-	    	        else if (obj instanceof JComboBox)    // Handle data-type selection.
+	    	      else if (obj instanceof JComboBox)    // Handle data-type selection.
 	    	        	lstSource.setModel(new DefaultComboBoxModel<>(aSources[lstType.getSelectedIndex()]));
-	    	        else if (obj instanceof JMenuItem) // Handle 'Exit' menu-click.
-	    				System.exit(0);  //Exit window
-	    		 
+	    	      else if (obj instanceof JMenuItem) // Handle 'Exit' menu-click.
+	    				System.exit(0);  //Exit window	    		 
 			} finally {			
 				win.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));			
-				}
+			}
 		}
 	
 	/* A worker class to do data-parsing as background job.

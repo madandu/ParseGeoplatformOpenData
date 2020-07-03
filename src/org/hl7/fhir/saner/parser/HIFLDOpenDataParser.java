@@ -68,37 +68,37 @@ public class HIFLDOpenDataParser implements ModelParser {
 	/**
 	 * Parses JSONObject Prints out all hospitals' attributes within JSONObject.
 	 * 
-	 * @param path to JSON file
+	 * @param JSON file-path 
 	 */
-	private String parseJSONFile(String jsonFilePath) {		
+	private String parseJSONFile(String jPath) {		
 		String msg = "";
  
-		try (FileReader reader = new FileReader(jsonFilePath)) {
+		try (FileReader read = new FileReader(jPath)) {
 
-			JSONTokener tokener = new JSONTokener(reader);			
+			JSONTokener tokener = new JSONTokener(read);			
 			JSONObject jso = new JSONObject(tokener);
-			reader.close();
+			read.close();
 			
-			JSONArray attributes = jso.getJSONArray("features");
+			JSONArray features = jso.getJSONArray("features");
 
-			HashMap<String, JSONObject> aggregateCountyWise = new HashMap<String, JSONObject>();
+			HashMap<String, JSONObject> aggCounties = new HashMap<String, JSONObject>();
 			String COUNTYFIPS  = null;
 			JSONObject attr, county = null;
 
-			for (Object item : attributes) {
+			for (Object item : features) {
 				if (item instanceof JSONObject) {
 					attr = ((JSONObject)item).getJSONObject("attributes");
 					// Use CountyFIPS as key, if exists aggregate critical hospital-resources.
 					COUNTYFIPS = attr.getString("COUNTYFIPS");
 
-					if (aggregateCountyWise.containsKey(COUNTYFIPS)) {
+					if (aggCounties.containsKey(COUNTYFIPS)) {
 						// Aggregate county-wise hospitals' resources
-						county = aggregateCountyWise.get(COUNTYFIPS);
+						county = aggCounties.get(COUNTYFIPS);
 						county.put("POPULATION", county.getInt("POPULATION")	+attr.getInt("POPULATION"));
 						county.put("TTL_STAFF", county.getInt("TTL_STAFF") +attr.getInt("TTL_STAFF"));
 						county.put("BEDS", county.getInt("BEDS") +attr.getInt("BEDS"));
 						// Replace the existing with aggregated values;
-						aggregateCountyWise.replace(COUNTYFIPS, county);
+						aggCounties.replace(COUNTYFIPS, county);
 
 					} else { // Initialize CountyObject for aggregation
 						county = new JSONObject();
@@ -112,15 +112,15 @@ public class HIFLDOpenDataParser implements ModelParser {
 						county.put("TTL_STAFF", attr.getInt("TTL_STAFF"));
 						county.put("BEDS", attr.getInt("BEDS"));
 						// Add new county object;
-						aggregateCountyWise.put(COUNTYFIPS, county);
+						aggCounties.put(COUNTYFIPS, county);
 					}
 				}
 			}
-			msg +="Completed analysis of critical hospital-resources in USA county-wise.\n\r";
+			msg +="Completed analysis of critical hospital-resources in USA-counties.\n\r";
 			//Validate results in .csv file:
-			msg += writeToCSV(aggregateCountyWise);	
+			msg += writeToCSV(aggCounties);	
 			// Clear hashMap in the end.
-			aggregateCountyWise.clear();				 
+			aggCounties.clear();				 
 		} catch (JSONException e) {
 			msg = "Parser error: " +e.getMessage();
 		} catch (FileNotFoundException e) {
@@ -143,7 +143,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 			JSONArray features = jso.getJSONArray("features");
 			if (features == null || features.length() ==0) return msg;
 			
-			HashMap<String, JSONObject> aggregateCountyWise = new HashMap<String, JSONObject>();
+			HashMap<String, JSONObject> aggCounties = new HashMap<String, JSONObject>();
 			JSONObject props, county = null;
 			String COUNTYFIPS = null;
 
@@ -152,14 +152,14 @@ public class HIFLDOpenDataParser implements ModelParser {
 					props = ((JSONObject) item).getJSONObject("properties");
 					COUNTYFIPS = props.getString("COUNTYFIPS");
 					// Use CountyFIPS as key, if exists county, aggregate critical-resources in its hospitals.
-					if (aggregateCountyWise.containsKey(COUNTYFIPS)) {
+					if (aggCounties.containsKey(COUNTYFIPS)) {
 						// Aggregate county-wise hospitals' resources
-						county = aggregateCountyWise.get(COUNTYFIPS);
+						county = aggCounties.get(COUNTYFIPS);
 						county.put("POPULATION", county.getInt("POPULATION") +props.getInt("POPULATION"));
 						county.put("TTL_STAFF", county.getInt("TTL_STAFF") +props.getInt("TTL_STAFF"));
 						county.put("BEDS", county.getInt("BEDS") +props.getInt("BEDS"));
 						// Replace the existing with aggregated values;
-						aggregateCountyWise.replace(COUNTYFIPS, county);
+						aggCounties.replace(COUNTYFIPS, county);
 						
 					} else { // Initialize CountyObject for aggregation
 						county = new JSONObject();
@@ -173,18 +173,18 @@ public class HIFLDOpenDataParser implements ModelParser {
 						county.put("TTL_STAFF", props.getInt("TTL_STAFF"));
 						county.put("BEDS",  props.getInt("BEDS"));
 						// Add new county object;
-						aggregateCountyWise.put(COUNTYFIPS, county);
+						aggCounties.put(COUNTYFIPS, county);
 					}
 				}
 			}
-			msg ="Completed analysis of critical hospital-resources in USA county-wise.\n\r";
+			msg ="Completed analysis of critical hospital-resources in USA-counties.\n\r";
 			//Validate results in .csv file:
-			msg += writeToCSV(aggregateCountyWise);
+			msg += writeToCSV(aggCounties);
 			// Clear hashMap in the end.
-			aggregateCountyWise.clear();
+			aggCounties.clear();
 			
-		} catch (JSONException je) {
-			msg = "Parser error: " + je.getMessage();
+		} catch (JSONException e) {
+			msg = "Parser error: " + e.getMessage();
 		} catch (Exception e) {
 			msg = "Parser error: " +e.getMessage();
 		}
@@ -202,7 +202,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 		try {
 			URL url = new URL(urlPath);
 			// Compute time taken to get/parse output from RESTUrl.
-			long startTime = System.currentTimeMillis();
+			long sTime = System.currentTimeMillis();
 			
 			// TODO Make HTTP UrlConnection more efficient and handle connection time-outs.
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -214,22 +214,22 @@ public class HIFLDOpenDataParser implements ModelParser {
 			}
 
 			// TODO make reading more efficient to handle large data from RESTUrl.
-			BufferedReader reader = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-			JSONObject hospitalRecords = new JSONObject(new JSONTokener(reader));
+			BufferedReader read = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+			JSONObject hospitalRecords = new JSONObject(new JSONTokener(read));
 
 			conn.disconnect();
-			reader.close();
+			read.close();
 
 			// Process and aggregate critical-resources in hospitals-records county-wise.
 			msg= parseUrlCountyWise(hospitalRecords);			
-			msg += "\n\rTook " + (System.currentTimeMillis() - startTime)+ " milliseconds to get and parse records.";
+			msg += "\n\rTook " + (System.currentTimeMillis() - sTime)+ " milliseconds to get and parse records.";
 
-		} catch (MalformedURLException me) {
-			msg = "Parser error: " +me.getMessage();
-		} catch (IOException io) {
-			msg = "Parser error: "+io.getMessage();
+		} catch (MalformedURLException e) {
+			msg = "Parser error: " +e.getMessage();
+		} catch (IOException e) {
+			msg = "Parser error: " +e.getMessage();
 		} catch (Exception e) {
-			msg = "Parser error: "+e.getMessage();
+			msg = "Parser error: " +e.getMessage();
 		}
 
 		return msg;	
@@ -245,10 +245,9 @@ public class HIFLDOpenDataParser implements ModelParser {
 			// TODO Read and parse XML
 		} catch (FileNotFoundException e) {
 			msg = e.getMessage();
-
 			e.printStackTrace();
-		} catch (IOException io) {
-			msg = "Parser error: " +io.getMessage();
+		} catch (IOException e) {
+			msg = "Parser error: " +e.getMessage();
 		} catch (Exception e) {
 			msg = "Parser error: " +e.getMessage();
 		}
@@ -258,45 +257,45 @@ public class HIFLDOpenDataParser implements ModelParser {
 	/**
 	 * Converts JSON object to CSV.
 	 */
-	private String writeToCSV(HashMap<String, JSONObject> jsoCounty) {		
+	private String writeToCSV(HashMap<String, JSONObject> jCounties) {		
 		String msg = "";
-		String rCSVFile= "Hifld_USA-Countywise-"+System.currentTimeMillis() +".csv ";
+		String csvFile = "Hifld_USA-Countywise-"+System.currentTimeMillis() +".csv ";
 		
-		try (FileWriter csvWriter = new FileWriter(rCSVFile)){
-				csvWriter.append("Country");
-				csvWriter.append(",");
-				csvWriter.append("State");
-				csvWriter.append(",");
-				csvWriter.append("County");
-				csvWriter.append(",");
-				csvWriter.append("Latitude");
-				csvWriter.append(",");
-				csvWriter.append("Longitude");
-				csvWriter.append(",");
-				csvWriter.append("Population");
-				csvWriter.append(",");
-				csvWriter.append("Total-Staff");
-				csvWriter.append(",");
-				csvWriter.append("Bed");
-				csvWriter.append("\n");
+		try (FileWriter csv = new FileWriter(csvFile)){
+				csv.append("Country");
+				csv.append(",");
+				csv.append("State");
+				csv.append(",");
+				csv.append("County");
+				csv.append(",");
+				csv.append("Latitude");
+				csv.append(",");
+				csv.append("Longitude");
+				csv.append(",");
+				csv.append("Population");
+				csv.append(",");
+				csv.append("Total-Staff");
+				csv.append(",");
+				csv.append("Bed");
+				csv.append("\n");
 				
-				for (String key : jsoCounty.keySet()) {
-					csvWriter.append(jsoCounty.get(key).getString("COUNTRY") +",");
-					csvWriter.append(jsoCounty.get(key).getString("STATE")+",");
-					csvWriter.append(jsoCounty.get(key).getString("COUNTY")+",");
-					csvWriter.append(jsoCounty.get(key).getDouble("LATITUDE")+",");
-					csvWriter.append(jsoCounty.get(key).getDouble("LONGITUDE")+",");
-					csvWriter.append(String.valueOf( jsoCounty.get(key).getInt("POPULATION"))+",");
-					csvWriter.append(String.valueOf( jsoCounty.get(key).getInt("TTL_STAFF"))+",");
-					csvWriter.append(String.valueOf( jsoCounty.get(key).getInt("BEDS")));
-				    csvWriter.append("\n");
+				for (String key : jCounties.keySet()) {
+					csv.append(jCounties.get(key).getString("COUNTRY") +",");
+					csv.append(jCounties.get(key).getString("STATE")+",");
+					csv.append(jCounties.get(key).getString("COUNTY")+",");
+					csv.append(jCounties.get(key).getDouble("LATITUDE")+",");
+					csv.append(jCounties.get(key).getDouble("LONGITUDE")+",");
+					csv.append(String.valueOf(jCounties.get(key).getInt("POPULATION"))+",");
+					csv.append(String.valueOf(jCounties.get(key).getInt("TTL_STAFF"))+",");
+					csv.append(String.valueOf(jCounties.get(key).getInt("BEDS")));
+				    csv.append("\n");
 				}
-				csvWriter.flush();
-				csvWriter.close();
-				msg = "Results in: " +rCSVFile;
+				csv.flush();
+				csv.close();
+				msg = "Results in: " +csvFile ;
 				
-		} catch (IOException io) {
-			msg = "Parser error: " +io.getMessage();
+		} catch (IOException e) {
+			msg = "Parser error: " +e.getMessage();
 		}
 		return msg;
 	}
@@ -311,8 +310,8 @@ public class HIFLDOpenDataParser implements ModelParser {
 				xml = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<"
 					+ root + ">" +org.json.XML.toString( jsonObject) + "</" + root + ">";
 			
-		} catch (JSONException je) {
-			je.printStackTrace();
+		} catch (JSONException e) {
+			e.printStackTrace();
 		} 
 		return xml;
 	}
