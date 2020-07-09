@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -117,10 +118,10 @@ public class HIFLDOpenDataParser implements ModelParser {
 				}
 			}
 			msg +="Completed analysis of critical hospital-resources in USA-counties.\n\r";
-			//Validate results in .csv file:
-			msg += writeToCSV(aggCounties);	
+			//Write JSONObjects in .csv file to validate results,
+			msg += writeToCSV(aggCounties.values());
 			// Clear hashMap in the end.
-			aggCounties.clear();				 
+			aggCounties.clear();
 		} catch (JSONException e) {
 			msg = "Parser error: " +e.getMessage();
 		} catch (FileNotFoundException e) {
@@ -128,7 +129,8 @@ public class HIFLDOpenDataParser implements ModelParser {
 		} catch (IOException e) {
 			msg = "Parser error: " +e.getMessage();
 		}
-		 return msg;
+		
+		return msg;
 	}
 	
 	/**
@@ -178,8 +180,8 @@ public class HIFLDOpenDataParser implements ModelParser {
 				}
 			}
 			msg ="Completed analysis of critical hospital-resources in USA-counties.\n\r";
-			//Validate results in .csv file:
-			msg += writeToCSV(aggCounties);
+			//Write JSONObjects in .csv file to validate results.			
+			msg += writeToCSV(aggCounties.values());
 			// Clear hashMap in the end.
 			aggCounties.clear();
 			
@@ -255,9 +257,9 @@ public class HIFLDOpenDataParser implements ModelParser {
 	}
 	
 	/**
-	 * Converts JSON object to CSV.
+	 * Write JSONObjects to CSV file.
 	 */
-	private String writeToCSV(HashMap<String, JSONObject> jCounties) {		
+	private String writeToCSV(Collection<JSONObject> counties) {		
 		String msg = "";
 		String csvFile = "Hifld_USA-Countywise-"+System.currentTimeMillis() +".csv ";
 		
@@ -276,27 +278,29 @@ public class HIFLDOpenDataParser implements ModelParser {
 				csv.append(",");
 				csv.append("Total-Staff");
 				csv.append(",");
-				csv.append("Bed");
-				csv.append("\n");
+				csv.append("Bed"+"\n");
 				
-				for (String key : jCounties.keySet()) {
-					csv.append(jCounties.get(key).getString("COUNTRY") +",");
-					csv.append(jCounties.get(key).getString("STATE")+",");
-					csv.append(jCounties.get(key).getString("COUNTY")+",");
-					csv.append(jCounties.get(key).getDouble("LATITUDE")+",");
-					csv.append(jCounties.get(key).getDouble("LONGITUDE")+",");
-					csv.append(String.valueOf(jCounties.get(key).getInt("POPULATION"))+",");
-					csv.append(String.valueOf(jCounties.get(key).getInt("TTL_STAFF"))+",");
-					csv.append(String.valueOf(jCounties.get(key).getInt("BEDS")));
-				    csv.append("\n");
+				for (JSONObject county : counties) {
+					csv.append(county.getString("COUNTRY") +",");
+					csv.append(county.getString("STATE")+",");
+					csv.append(county.getString("COUNTY")+",");
+					csv.append(county.getDouble("LATITUDE")+",");
+					csv.append(county.getDouble("LONGITUDE")+",");
+					csv.append(county.getInt("POPULATION")+",");
+					csv.append(county.getInt("TTL_STAFF")+",");
+					csv.append(county.getInt("BEDS")+"\n");
 				}
+				
 				csv.flush();
 				csv.close();
+				counties.clear();
+				counties = null;
 				msg = "Results in: " +csvFile ;
 				
 		} catch (IOException e) {
 			msg = "Parser error: " +e.getMessage();
 		}
+		
 		return msg;
 	}
 
