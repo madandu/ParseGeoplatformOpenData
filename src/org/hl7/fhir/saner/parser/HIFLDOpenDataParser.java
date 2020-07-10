@@ -1,5 +1,6 @@
 package org.hl7.fhir.saner.parser;
 
+import org.hl7.fhir.saner.Util;
 import org.hl7.fhir.saner.data.Model;
 
 import org.json.JSONArray;
@@ -9,7 +10,6 @@ import org.json.JSONTokener;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -17,12 +17,12 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collection;
 import java.util.HashMap;
 
 /**
  * @author Madan Upadhyay
- * @email: madandu@gmail.com Parse for HIFLD opendata to parse variety of data.
+ * @email: madandu@gmail.com 
+ * HIFLD open-data parser to analyze variety of data.
  */
 public class HIFLDOpenDataParser implements ModelParser {
 
@@ -119,7 +119,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 			}
 			msg +="Completed analysis of critical hospital-resources in USA-counties.\n\r";
 			//Write JSONObjects in .csv file to validate results,
-			msg += writeToCSV(aggCounties.values());
+			msg += Util.writeToCSV(aggCounties.values());
 			// Clear hashMap in the end.
 			aggCounties.clear();
 		} catch (JSONException e) {
@@ -181,7 +181,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 			}
 			msg ="Completed analysis of critical hospital-resources in USA-counties.\n\r";
 			//Write JSONObjects in .csv file to validate results.			
-			msg += writeToCSV(aggCounties.values());
+			msg += Util.writeToCSV(aggCounties.values());
 			// Clear hashMap in the end.
 			aggCounties.clear();
 			
@@ -255,68 +255,5 @@ public class HIFLDOpenDataParser implements ModelParser {
 		}
 		return msg;
 	}
-	
-	/**
-	 * Write JSONObjects to CSV file.
-	 */
-	private String writeToCSV(Collection<JSONObject> counties) {		
-		String msg = "";
-		String csvFile = "Hifld_USA-Countywise-"+System.currentTimeMillis() +".csv ";
-		
-		try (FileWriter csv = new FileWriter(csvFile)){
-				csv.append("Country");
-				csv.append(",");
-				csv.append("State");
-				csv.append(",");
-				csv.append("County");
-				csv.append(",");
-				csv.append("Latitude");
-				csv.append(",");
-				csv.append("Longitude");
-				csv.append(",");
-				csv.append("Population");
-				csv.append(",");
-				csv.append("Total-Staff");
-				csv.append(",");
-				csv.append("Bed"+"\n");
-				
-				for (JSONObject county : counties) {
-					csv.append(county.getString("COUNTRY") +",");
-					csv.append(county.getString("STATE")+",");
-					csv.append(county.getString("COUNTY")+",");
-					csv.append(county.getDouble("LATITUDE")+",");
-					csv.append(county.getDouble("LONGITUDE")+",");
-					csv.append(county.getInt("POPULATION")+",");
-					csv.append(county.getInt("TTL_STAFF")+",");
-					csv.append(county.getInt("BEDS")+"\n");
-				}
-				
-				csv.flush();
-				csv.close();
-				counties.clear();
-				counties = null;
-				msg = "Results in: " +csvFile ;
-				
-		} catch (IOException e) {
-			msg = "Parser error: " +e.getMessage();
-		}
-		
-		return msg;
-	}
 
-	/**
-	 * Converts JSON object to XML returns XML string.
-	 */
-	private String convertJSONToXMLReport(JSONObject jsonObject, String root) throws JSONException {
-		
-		String xml = "";
-		try {
-				xml = "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\n<"
-					+ root + ">" +org.json.XML.toString( jsonObject) + "</" + root + ">";
-			
-		} catch (JSONException e) {
-			e.printStackTrace();
-		} 
-		return xml;
-	}
 }
