@@ -1,4 +1,4 @@
-package org.hl7.fhir.saner;
+package org.saner.ui;
 
 import java.awt.Cursor;
 import java.awt.EventQueue;
@@ -24,9 +24,9 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
 
-import org.hl7.fhir.saner.data.Context;
-import org.hl7.fhir.saner.data.Model;
-import org.hl7.fhir.saner.parser.HIFLDOpenDataParser;
+import org.saner.opendata.Context;
+import org.saner.opendata.Model;
+import org.saner.parser.HIFLDOpenDataParser;
 
 /**
  * @author Madan Upadhyay

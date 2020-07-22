@@ -1,4 +1,4 @@
-package org.hl7.fhir.saner.data;
+package org.saner.opendata;
 
 /**
  * @author Madan Upadhyay

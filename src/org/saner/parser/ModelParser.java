@@ -1,4 +1,4 @@
-package org.hl7.fhir.saner.parser;
+package org.saner.parser;
 
 /**
  * @author Madan Upadhyay
