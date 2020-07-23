@@ -1,4 +1,4 @@
-package org.hl7.fhir.saner.data;
+package org.saner.opendata;
 
 /**
  * @author Madan Upadhyay
@@ -11,10 +11,10 @@ public class Context {
 	
 	public enum Type {
 	    JSON,
-	    XML,
-	    CSV,
 	    REST,
-	    SQL
+	    FHIR,
+	    XML,
+	    CSV
 	}
 	
 	/**
