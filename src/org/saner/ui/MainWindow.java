@@ -41,7 +41,7 @@ public class MainWindow extends JFrame implements ActionListener {
 	
 	private static JComboBox<String> lstType;
 	private static JComboBox<String> lstSource;
-	private static JButton btnProc;
+	private static JButton btnProc,btnMap;
 	private static	String[][] aSources;
 	private static	GridBagConstraints gbc;
 	private static JFrame win;
@@ -88,12 +88,24 @@ public class MainWindow extends JFrame implements ActionListener {
 		initializeLists();
 	
 		btnProc = new JButton("Analyze-data");
+		btnProc.setActionCommand("Analyze");
 		btnProc.addActionListener(this);
-		gbc.fill = GridBagConstraints.CENTER;
 		gbc.gridx = 1;
 		gbc.gridy = 2;
-		gbc.gridwidth = 2;
+		gbc.gridwidth = 1;
+		gbc.fill = GridBagConstraints.EAST;
 		this.getContentPane().add(btnProc, gbc);
+		
+		
+		btnMap = new JButton("Show-Map");
+		btnMap.setActionCommand("Map");
+		btnMap.addActionListener(this);
+		gbc.fill = GridBagConstraints.WEST;
+		gbc.gridx = 2;
+		gbc.gridy = 2;
+		gbc.gridwidth = 1;
+		this.getContentPane().add(btnMap, gbc);
+		
 		
 		this.pack();
 		
@@ -185,6 +197,14 @@ public class MainWindow extends JFrame implements ActionListener {
 	    		 obj = e.getSource();
 	  
 	    		 if (obj instanceof JButton) {   // Handle Process-button click
+	    			 
+	    			switch (((JButton) obj).getActionCommand()) {
+					
+	    			case "Map":
+	    				this.showWelcome();
+						break;
+
+					case "Analyze":
 	    				Context.Type dType = Context.Type.valueOf(lstType.getSelectedItem().toString());
 	    				String dSource = lstSource.getSelectedItem().toString();
 	    		
@@ -192,7 +212,11 @@ public class MainWindow extends JFrame implements ActionListener {
 	    				final Model model = new Model(ctx);
 	    				// Start parsing...
 	    				 new ParserWorker(model).run();
-	    			}
+						break;
+					default:		    			 
+					}
+
+	    		 }
 	    	      else if (obj instanceof JComboBox)    // Handle data-type selection.
 	    	        	lstSource.setModel(new DefaultComboBoxModel<>(aSources[lstType.getSelectedIndex()]));
 	    	      else if (obj instanceof JMenuItem) // Handle 'Exit' menu-click.

@@ -70,12 +70,12 @@ public class HIFLDOpenDataParser implements ModelParser {
 	 * 
 	 * @param JSON file-path 
 	 */
-	private String parseJSONFile(String jPath) {		
+	private String parseJSONFile(String jPath) {
 		String msg = "";
  
 		try (FileReader read = new FileReader(jPath)) {
 
-			JSONTokener tokener = new JSONTokener(read);			
+			JSONTokener tokener = new JSONTokener(read);
 			JSONObject jso = new JSONObject(tokener);
 			read.close();
 			
@@ -179,7 +179,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 				}
 			}
 			msg ="Completed analysis of critical hospital-resources in USA-counties.\n\r";
-			//Write JSONObjects in .csv file to validate results.			
+			//Write JSONObjects in .csv file to validate results.
 			msg += Util.writeToCSV(aggCounties.values());
 			// Clear hashMap in the end.
 			aggCounties.clear();
@@ -189,7 +189,7 @@ public class HIFLDOpenDataParser implements ModelParser {
 		} catch (Exception e) {
 			msg = "Parser error: " +e.getMessage();
 		}
-			return msg;			
+			return msg;
 	}
 
 	/**
